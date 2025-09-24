@@ -5,7 +5,7 @@
 
 Follow these steps to run the project locally:
 
-1. **Clone the repository**
+1. `pnpm install`
 
 ## Your Task
 Build a UI for **Google My Business Reviews**. The solution should include:
