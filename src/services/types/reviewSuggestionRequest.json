@@ -1,0 +1,1 @@
+{"type":"object","required":["review"],"properties":{"review":{"type":"string","minLength":1,"description":"The customer review text to generate suggestions for","example":"I had a terrible experience at Pet Store. The staff was unprofessional, and the service was unacceptable."}},"x-readme-ref-name":"ReviewSuggestionRequest"}

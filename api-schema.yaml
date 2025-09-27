@@ -1,0 +1,1430 @@
+openapi: 3.0.3
+info:
+  title: GMBapi - Google My Business API
+  description: |
+    API for managing Google My Business reviews and locations.
+    This is a closed Beta version and is currently under development.
+    More endpoints will be added in the near future.
+  version: 1.0.0
+  contact:
+    name: GMBapi Support
+    url: http://34.34.4.123/support
+  license:
+    name: Closed Beta
+    url: http://34.34.4.123/license
+
+servers:
+  - url: https://gmbapi-external-api-800414123378.europe-west4.run.app
+    description: GMBapi Development Server
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Review Endpoints
+  /external-api/gmb/review/account:
+    post:
+      tags:
+        - Reviews
+      summary: Get reviews
+      description: Retrieve reviews with filtering and pagination options
+      operationId: getReviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewFilters"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /reviews/{reviewId}/reply:
+    post:
+      tags:
+        - Reviews
+      summary: Reply to review
+      description: Post a reply to a specific review
+      operationId: replyToReview
+      parameters:
+        - name: reviewId
+          in: path
+          required: true
+          description: Unique identifier for the review
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewReplyRequest"
+      responses:
+        "201":
+          description: Reply created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewReplyResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /external-api/gmb/review/suggestion:
+    post:
+      tags:
+        - Reviews
+      summary: Get review suggestion
+      description: Get AI-generated reply suggestions for a customer review
+      operationId: getReviewSuggestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ReviewSuggestionRequest"
+      responses:
+        "200":
+          description: Successful response with suggestion
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewSuggestionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /external-api/gmb/review/kpi:
+    get:
+      tags:
+        - Reviews
+      summary: Get Account KPIs
+      description: Retrieves review KPIs based on Account Id
+      operationId: getAccountKPIs
+      responses:
+        "200":
+          description: Successful response with account KPIs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountKPIsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  # Location Endpoints
+  /external-api/gmb/location:
+    get:
+      tags:
+        - Locations
+      summary: List GMB locations
+      description: List GMB locations for the current account
+      operationId: getLocations
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: per_page
+          in: query
+          description: Results per page. Default is 10. Maximum is 50
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: store_code
+          in: query
+          description: Filter locations based on store code
+          schema:
+            type: string
+        - name: include_fields
+          in: query
+          description: Select the fields to include based on the Location object
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response with locations list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocationListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /external-api/gmb/account_location/profile/{location_id}:
+    get:
+      tags:
+        - Locations
+      summary: Get Account Location Profile
+      description: Retrieves the profile of an account location based on the location_id parameter
+      operationId: getAccountLocationProfile
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          description: Location Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response with location profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountLocationProfileResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /external-api/gmb/account_location/labels:
+    get:
+      tags:
+        - Locations
+      summary: Get Account Location Labels
+      description: Retrieves all account(location group) labels by {account_id}
+      operationId: getAccountLocationLabels
+      responses:
+        "200":
+          description: Successful response with location labels
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountLocationLabelsResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /external-api/gmb/account_location/hygiene/{location_id}:
+    get:
+      tags:
+        - Locations
+      summary: Get Account Location Hygiene
+      description: Retrieves all account(location group) hygiene by {location_id}
+      operationId: getAccountLocationHygiene
+      parameters:
+        - name: location_id
+          in: path
+          required: true
+          description: Location Id
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Successful response with location hygiene
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountLocationHygieneResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "404":
+          $ref: "#/components/responses/NotFoundError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /external-api/gmb/review/location:
+    post:
+      tags:
+        - Reviews
+      summary: Get Location Reviews
+      description: Get reviews for a specific location with filtering and pagination options
+      operationId: getLocationReviews
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LocationReviewFilters"
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReviewListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequestError"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Bearer token authentication. Include the token in the Authorization header.
+        Example: `Authorization: Bearer <your-token>`
+
+  schemas:
+    # Review Schemas
+    Review:
+      type: object
+      required:
+        - id
+        - customerName
+        - rating
+        - comment
+        - date
+        - locationId
+        - status
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the review
+          example: "rev_123456789"
+        customerName:
+          type: string
+          description: Name of the customer who left the review
+          example: "John Smith"
+        customerPhoto:
+          type: string
+          format: uri
+          description: URL to customer's profile photo
+          example: "https://example.com/photos/john.jpg"
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Star rating (1-5)
+          example: 4
+        comment:
+          type: string
+          description: Review text content
+          example: "Great coffee and friendly staff! Will definitely come back."
+        date:
+          type: string
+          format: date-time
+          description: Date when the review was posted
+          example: "2024-01-15T14:30:00Z"
+        locationId:
+          type: string
+          description: ID of the location this review is for
+          example: "loc_123456789"
+        locationName:
+          type: string
+          description: Name of the location
+          example: "Joe's Coffee Shop - Downtown"
+        status:
+          type: string
+          enum: [new, replied, hidden, flagged]
+          description: Current status of the review
+          example: "new"
+        businessReply:
+          $ref: "#/components/schemas/ReviewReply"
+        helpfulVotes:
+          type: integer
+          minimum: 0
+          description: Number of helpful votes
+          example: 3
+        photos:
+          type: array
+          items:
+            type: string
+            format: uri
+          description: URLs to photos attached to the review
+          example: ["https://example.com/review-photos/1.jpg"]
+
+    ReviewReply:
+      type: object
+      required:
+        - id
+        - text
+        - date
+        - isPublic
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the reply
+          example: "reply_123456789"
+        text:
+          type: string
+          description: Reply text content
+          example: "Thank you for your kind words, John! We're thrilled you enjoyed your visit."
+        date:
+          type: string
+          format: date-time
+          description: Date when the reply was posted
+          example: "2024-01-16T09:15:00Z"
+        isPublic:
+          type: boolean
+          description: Whether the reply is visible to the public
+          example: true
+        author:
+          type: string
+          description: Name of the person who wrote the reply
+          example: "Sarah Johnson - Manager"
+
+    ReviewFilters:
+      type: object
+      properties:
+        star_rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Review rating between 1 to 5
+          example: 4
+        has_comment:
+          type: boolean
+          description: If review has response
+          example: true
+        has_reply:
+          type: boolean
+          description: If review has a business reply (reply field = 1)
+          example: true
+        is_deleted:
+          type: boolean
+          description: If review has been deleted from Google
+          example: false
+        page:
+          type: number
+          description: Page number
+          example: 1
+        per_page:
+          type: number
+          default: 10
+          maximum: 50
+          description: Results per page. Default is 10. Maximum is 50
+          example: 10
+
+    ReviewListResponse:
+      type: object
+      required:
+        - reviews
+        - pagination
+        - summary
+      properties:
+        reviews:
+          type: array
+          items:
+            $ref: "#/components/schemas/Review"
+        pagination:
+          $ref: "#/components/schemas/Pagination"
+        summary:
+          $ref: "#/components/schemas/ReviewSummary"
+
+    ReviewSummary:
+      type: object
+      required:
+        - total
+        - averageRating
+        - ratingDistribution
+      properties:
+        total:
+          type: integer
+          description: Total number of reviews matching filters
+          example: 156
+        averageRating:
+          type: number
+          format: float
+          minimum: 1
+          maximum: 5
+          description: Average rating of filtered reviews
+          example: 4.2
+        ratingDistribution:
+          type: object
+          description: Distribution of ratings (1-5 stars)
+          properties:
+            "1":
+              type: integer
+              example: 5
+            "2":
+              type: integer
+              example: 8
+            "3":
+              type: integer
+              example: 12
+            "4":
+              type: integer
+              example: 45
+            "5":
+              type: integer
+              example: 86
+
+    ReviewReplyRequest:
+      type: object
+      required:
+        - text
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          description: Reply text content
+          example: "Thank you for your feedback! We appreciate your business."
+        isPublic:
+          type: boolean
+          default: true
+          description: Whether the reply should be visible to the public
+          example: true
+
+    ReviewReplyResponse:
+      type: object
+      required:
+        - reply
+        - review
+      properties:
+        reply:
+          $ref: "#/components/schemas/ReviewReply"
+        review:
+          $ref: "#/components/schemas/Review"
+
+    ReviewSuggestionRequest:
+      type: object
+      required:
+        - review
+      properties:
+        review:
+          type: string
+          minLength: 1
+          description: The customer review text to generate suggestions for
+          example: "I had a terrible experience at Pet Store. The staff was unprofessional, and the service was unacceptable."
+
+    ReviewSuggestionResponse:
+      type: object
+      required:
+        - msg
+      properties:
+        msg:
+          type: array
+          items:
+            type: object
+            required:
+              - index
+              - message
+              - logprobs
+              - finish_reason
+            properties:
+              index:
+                type: integer
+                description: Index of the message
+                example: 0
+              message:
+                type: object
+                required:
+                  - role
+                  - content
+                properties:
+                  role:
+                    type: string
+                    description: Role of the message sender
+                    example: "assistant"
+                  content:
+                    type: string
+                    description: AI-generated reply suggestion for the review
+                    example: "Lamentamos mucho escuchar sobre tu mala experiencia en nuestra tienda. Nos disculpamos sinceramente por cualquier inconveniente que hayas experimentado con nuestro personal y servicio."
+                  annotations:
+                    type: array
+                    items:
+                      type: object
+                    description: Additional annotations
+                    example: []
+                  refusal:
+                    type: string
+                    nullable: true
+                    description: Refusal reason if any
+                    example: null
+              logprobs:
+                type: string
+                nullable: true
+                description: Log probabilities
+                example: null
+              finish_reason:
+                type: string
+                description: Reason for finishing the response
+                example: "stop"
+
+    AccountKPIsResponse:
+      type: object
+      required:
+        - success
+        - payload
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        payload:
+          type: object
+          required:
+            - average_rating
+            - number_of_comments
+            - reply_percentage
+            - response_time
+            - number_ratings
+          properties:
+            average_rating:
+              type: number
+              format: float
+              nullable: true
+              description: Average rating across all reviews
+              example: 4.2
+            number_of_comments:
+              type: integer
+              minimum: 0
+              description: Total number of reviews with comments
+              example: 156
+            reply_percentage:
+              type: number
+              format: float
+              nullable: true
+              description: Percentage of reviews that have been replied to
+              example: 85.5
+            response_time:
+              type: integer
+              minimum: 0
+              description: Average response time in hours
+              example: 24
+            number_ratings:
+              type: integer
+              minimum: 0
+              description: Total number of ratings
+              example: 200
+
+    # Location Schemas
+    Location:
+      type: object
+      required:
+        - account_id
+        - location_id
+        - name
+        - address
+        - city
+        - state
+        - country_code
+        - latitude
+        - longitude
+        - phone_number
+        - category
+        - average_rating
+        - health
+        - is_published
+        - is_verified
+      properties:
+        account_id:
+          type: string
+          description: Account identifier
+          example: "demo250"
+        location_id:
+          type: string
+          description: Unique location identifier
+          example: "73"
+        name:
+          type: string
+          description: Location name
+          example: "Pet Store"
+        address:
+          type: string
+          description: Street address
+          example: "1649 Timberridge Court"
+        city:
+          type: string
+          description: City name
+          example: "Fayetteville"
+        state:
+          type: string
+          description: State or province
+          example: "Active"
+        country_code:
+          type: string
+          description: Country code
+          example: "US"
+        postal:
+          type: string
+          description: Postal code
+          example: "1019 CZ"
+        latitude:
+          type: number
+          format: float
+          description: Latitude coordinate
+          example: 36.084563
+        longitude:
+          type: number
+          format: float
+          description: Longitude coordinate
+          example: -94.206082
+        phone_number:
+          type: string
+          description: Primary phone number
+          example: "020 419 6634"
+        additional_phone_numbers:
+          type: array
+          items:
+            type: string
+          description: Additional phone numbers
+          example: []
+        category:
+          type: string
+          description: Primary business category
+          example: "petstore"
+        additional_categories:
+          type: array
+          items:
+            type: string
+          description: Additional business categories
+          example: ["Aquarium Store", " Reptile Store"]
+        description:
+          type: string
+          description: Business description
+          example: "Welcome to Pet Store, your trusted destination for premium pet products and supplies."
+        website_uri:
+          type: string
+          format: uri
+          description: Website URL
+          example: "http://gmbapi.com"
+        average_rating:
+          type: number
+          format: float
+          description: Average customer rating
+          example: 3.84
+        number_comments:
+          type: integer
+          description: Number of reviews/comments
+          example: 25
+        reply_percentage:
+          type: number
+          format: float
+          description: Percentage of reviews replied to
+          example: 44
+        average_response_time:
+          type: number
+          format: float
+          description: Average response time in hours
+          example: 451.64
+        health:
+          type: number
+          format: float
+          description: Overall location health score
+          example: 83.33
+        attribute_health:
+          type: number
+          format: float
+          description: Attribute health score
+          example: 38.64
+        attributes:
+          type: array
+          items:
+            type: string
+          description: Business attributes
+          example: ["has_curbside_pickup", "pay_credit_card", "has_delivery"]
+        is_published:
+          type: integer
+          enum: [0, 1]
+          description: Whether location is published
+          example: 1
+        is_verified:
+          type: integer
+          enum: [0, 1]
+          description: Whether location is verified
+          example: 1
+        placeId:
+          type: string
+          description: Google Place ID
+          example: "P073"
+        store_code:
+          type: string
+          description: Store code
+          example: "73"
+        has_additional_categories:
+          type: integer
+          enum: [0, 1]
+          description: Whether has additional categories
+          example: 1
+        has_address:
+          type: integer
+          enum: [0, 1]
+          description: Whether has address
+          example: 1
+        has_attributes:
+          type: integer
+          enum: [0, 1]
+          description: Whether has attributes
+          example: 1
+        has_category:
+          type: integer
+          enum: [0, 1]
+          description: Whether has category
+          example: 1
+        has_cover_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has cover image
+          example: 1
+        has_description:
+          type: integer
+          enum: [0, 1]
+          description: Whether has description
+          example: 1
+        has_exterior_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has exterior image
+          example: 0
+        has_hours:
+          type: integer
+          enum: [0, 1]
+          description: Whether has hours
+          example: 1
+        has_interior_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has interior image
+          example: 1
+        has_logo_or_profile_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has logo or profile image
+          example: 1
+        has_pending_edits:
+          type: integer
+          enum: [0, 1]
+          description: Whether has pending edits
+          example: 1
+        has_phone:
+          type: integer
+          enum: [0, 1]
+          description: Whether has phone
+          example: 1
+        has_service:
+          type: integer
+          enum: [0, 1]
+          description: Whether has service
+          example: 0
+        has_service_with_description:
+          type: integer
+          enum: [0, 1]
+          description: Whether has service with description
+          example: 0
+        has_special_hours:
+          type: integer
+          enum: [0, 1]
+          description: Whether has special hours
+          example: 1
+        has_utm_params:
+          type: integer
+          enum: [0, 1]
+          description: Whether has UTM parameters
+          example: 1
+        has_website:
+          type: integer
+          enum: [0, 1]
+          description: Whether has website
+          example: 1
+        regular_hours:
+          type: array
+          items:
+            type: object
+          description: Regular business hours
+          example: []
+        special_hours:
+          type: array
+          items:
+            type: object
+          description: Special business hours
+          example: []
+
+    LocationListResponse:
+      type: object
+      required:
+        - success
+        - payload
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        payload:
+          type: object
+          required:
+            - metadata
+            - data
+          properties:
+            metadata:
+              type: object
+              required:
+                - pages
+                - results_per_page
+                - current_page
+                - results
+              properties:
+                pages:
+                  type: integer
+                  description: Total number of pages
+                  example: 18
+                results_per_page:
+                  type: integer
+                  description: Number of results per page
+                  example: 10
+                current_page:
+                  type: integer
+                  description: Current page number
+                  example: 1
+                results:
+                  type: integer
+                  description: Total number of results
+                  example: 173
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/Location"
+
+    # Account Location Profile Schemas
+    AccountLocationProfileData:
+      type: object
+      required:
+        - name
+        - location_id
+        - store_code
+        - address
+        - city
+        - country_code
+        - attribute_health
+        - attribute_json
+        - description
+        - category
+        - regular_hours
+        - special_hours
+        - phone_number
+        - website_uri
+        - latitude
+        - longitude
+      properties:
+        name:
+          type: string
+          description: Location name
+          example: "Pet Store"
+        location_id:
+          type: string
+          description: Unique location identifier
+          example: "99"
+        store_code:
+          type: string
+          description: Store code
+          example: "99"
+        address:
+          type: string
+          description: Street address
+          example: "188 River Road"
+        postal:
+          type: string
+          description: Postal code
+          example: "8232 DN"
+        city:
+          type: string
+          description: City name
+          example: "Essex"
+        country_code:
+          type: string
+          description: Country code
+          example: "US"
+        attribute_health:
+          type: number
+          format: float
+          description: Attribute health score
+          example: 25
+        attribute_json:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocationAttribute"
+          description: Location attributes in JSON format
+        description:
+          type: string
+          description: Business description
+          example: "Welcome to Pet Store, your trusted destination for premium pet products and supplies."
+        category:
+          type: string
+          description: Primary business category
+          example: "petstore"
+        additional_categories:
+          type: array
+          items:
+            type: string
+          description: Additional business categories
+          example: ["Aquarium Store", " Reptile Store"]
+        regular_hours:
+          type: array
+          items:
+            type: object
+          description: Regular business hours
+          example: []
+        special_hours:
+          type: array
+          items:
+            type: object
+          description: Special business hours
+          example: []
+        phone_number:
+          type: string
+          description: Primary phone number
+          example: "0320 331 133"
+        website_uri:
+          type: string
+          format: uri
+          description: Website URL
+          example: "http://gmbapi.com"
+        latitude:
+          type: number
+          format: float
+          description: Latitude coordinate
+          example: 44.478846
+        longitude:
+          type: number
+          format: float
+          description: Longitude coordinate
+          example: -73.058294
+
+    LocationAttribute:
+      type: object
+      required:
+        - name
+        - valueType
+      properties:
+        name:
+          type: string
+          description: Attribute name
+          example: "attributes/has_curbside_pickup"
+        values:
+          type: array
+          items:
+            type: boolean
+          description: Boolean values for the attribute
+          example: [false]
+        repeatedEnumValue:
+          type: object
+          properties:
+            setValues:
+              type: array
+              items:
+                type: string
+              example: ["visa", "american_express", "mastercard"]
+        valueType:
+          type: string
+          enum: ["BOOL", "REPEATED_ENUM"]
+          description: Type of the attribute value
+          example: "BOOL"
+
+    LocationAttributes:
+      type: object
+      required:
+        - missing_attributes
+        - available_attributes
+      properties:
+        missing_attributes:
+          type: array
+          items:
+            type: string
+          description: List of missing attributes
+          example: ["pay_credit_card", "url_pinterest", "url_youtube"]
+        available_attributes:
+          type: array
+          items:
+            type: string
+          description: List of available attributes
+          example: ["has_curbside_pickup", "pay_debit_card", "pay_mobile_nfc"]
+
+    LocationHygiene:
+      type: object
+      required:
+        - location_id
+        - is_verified
+        - is_published
+        - has_phone
+        - has_website
+        - has_address
+        - has_hours
+        - has_special_hours
+        - has_category
+        - has_additional_categories
+        - has_attributes
+        - has_description
+        - has_cover_image
+        - has_logo_or_profile_image
+        - has_interior_image
+        - has_exterior_image
+        - has_service_with_description
+        - has_service
+        - has_utm_params
+        - health
+      properties:
+        location_id:
+          type: string
+          description: Location identifier
+          example: "99"
+        is_verified:
+          type: integer
+          enum: [0, 1]
+          description: Whether location is verified
+          example: 1
+        is_published:
+          type: integer
+          enum: [0, 1]
+          description: Whether location is published
+          example: 1
+        has_phone:
+          type: integer
+          enum: [0, 1]
+          description: Whether has phone
+          example: 1
+        has_website:
+          type: integer
+          enum: [0, 1]
+          description: Whether has website
+          example: 1
+        has_address:
+          type: integer
+          enum: [0, 1]
+          description: Whether has address
+          example: 1
+        has_hours:
+          type: integer
+          enum: [0, 1]
+          description: Whether has hours
+          example: 1
+        has_special_hours:
+          type: integer
+          enum: [0, 1]
+          description: Whether has special hours
+          example: 1
+        has_category:
+          type: integer
+          enum: [0, 1]
+          description: Whether has category
+          example: 1
+        has_additional_categories:
+          type: integer
+          enum: [0, 1]
+          description: Whether has additional categories
+          example: 1
+        has_attributes:
+          type: integer
+          enum: [0, 1]
+          description: Whether has attributes
+          example: 1
+        has_description:
+          type: integer
+          enum: [0, 1]
+          description: Whether has description
+          example: 1
+        has_cover_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has cover image
+          example: 0
+        has_logo_or_profile_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has logo or profile image
+          example: 1
+        has_interior_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has interior image
+          example: 1
+        has_exterior_image:
+          type: integer
+          enum: [0, 1]
+          description: Whether has exterior image
+          example: 1
+        has_service_with_description:
+          type: integer
+          enum: [0, 1]
+          description: Whether has service with description
+          example: 0
+        has_service:
+          type: integer
+          enum: [0, 1]
+          description: Whether has service
+          example: 0
+        has_utm_params:
+          type: integer
+          enum: [0, 1]
+          description: Whether has UTM parameters
+          example: 0
+        health:
+          type: number
+          format: float
+          description: Overall location health score
+          example: 77.78
+
+    AccountLocationProfileResponse:
+      type: object
+      required:
+        - success
+        - payload
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        payload:
+          type: object
+          required:
+            - data
+            - attributes
+            - hygiene
+          properties:
+            data:
+              $ref: "#/components/schemas/AccountLocationProfileData"
+            attributes:
+              $ref: "#/components/schemas/LocationAttributes"
+            hygiene:
+              $ref: "#/components/schemas/LocationHygiene"
+
+    AccountLocationLabelsResponse:
+      type: object
+      required:
+        - success
+        - payload
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        payload:
+          type: array
+          items:
+            $ref: "#/components/schemas/LocationLabel"
+          description: List of location labels
+
+    LocationLabel:
+      type: object
+      required:
+        - id
+        - name
+        - color
+        - description
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the label
+          example: "label_123"
+        name:
+          type: string
+          description: Label name
+          example: "High Priority"
+        color:
+          type: string
+          description: Label color in hex format
+          example: "#FF5733"
+        description:
+          type: string
+          description: Label description
+          example: "Locations requiring immediate attention"
+
+    AccountLocationHygieneResponse:
+      type: object
+      required:
+        - success
+        - payload
+      properties:
+        success:
+          type: boolean
+          description: Whether the request was successful
+          example: true
+        payload:
+          $ref: "#/components/schemas/LocationHygiene"
+
+    LocationReviewFilters:
+      type: object
+      properties:
+        location_id:
+          type: string
+          description: Google Location Id
+          example: "loc_123456789"
+        store_code:
+          type: string
+          description: Location Store Code. Can be provided in place of a Location Id
+          example: "STORE001"
+        star_rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          description: Review rating between 1 to 5
+          example: 4
+        has_comment:
+          type: boolean
+          description: If review has response
+          example: true
+        is_deleted:
+          type: boolean
+          description: If review has been deleted from Google
+          example: false
+        page:
+          type: number
+          description: Page number
+          example: 1
+        per_page:
+          type: number
+          default: 10
+          maximum: 50
+          description: Results per page. Default is 10. Maximum is 50
+          example: 10
+
+    # Common Schemas
+    Pagination:
+      type: object
+      required:
+        - page
+        - limit
+        - total
+        - totalPages
+      properties:
+        page:
+          type: integer
+          minimum: 1
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          minimum: 1
+          description: Number of items per page
+          example: 20
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of items
+          example: 156
+        totalPages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+          example: 8
+        hasNext:
+          type: boolean
+          description: Whether there is a next page
+          example: true
+        hasPrev:
+          type: boolean
+          description: Whether there is a previous page
+          example: false
+
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error code
+          example: "VALIDATION_ERROR"
+        message:
+          type: string
+          description: Human-readable error message
+          example: "The request contains invalid data"
+        details:
+          type: object
+          description: Additional error details
+          example:
+            field: "rating"
+            reason: "Must be between 1 and 5"
+        timestamp:
+          type: string
+          format: date-time
+          description: When the error occurred
+          example: "2024-01-20T10:30:00Z"
+        requestId:
+          type: string
+          description: Unique identifier for this request
+          example: "req_123456789"
+
+  responses:
+    BadRequestError:
+      description: Bad request - invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: "VALIDATION_ERROR"
+            message: "The request contains invalid data"
+            details:
+              field: "rating"
+              reason: "Must be between 1 and 5"
+            timestamp: "2024-01-20T10:30:00Z"
+            requestId: "req_123456789"
+
+    UnauthorizedError:
+      description: Unauthorized - invalid or missing authentication
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: "UNAUTHORIZED"
+            message: "Invalid or missing authentication token"
+            timestamp: "2024-01-20T10:30:00Z"
+            requestId: "req_123456789"
+
+    NotFoundError:
+      description: Not found - requested resource does not exist
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: "NOT_FOUND"
+            message: "The requested resource was not found"
+            timestamp: "2024-01-20T10:30:00Z"
+            requestId: "req_123456789"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: "INTERNAL_ERROR"
+            message: "An internal server error occurred"
+            timestamp: "2024-01-20T10:30:00Z"
+            requestId: "req_123456789"
+
+tags:
+  - name: Reviews
+    description: Operations related to customer reviews and replies
+  - name: Locations
+    description: Operations related to GMB locations management
