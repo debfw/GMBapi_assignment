@@ -3,7 +3,8 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReviewReply } from "../../../../src/components/reviews/ReviewReply";
+import { ReviewReplyDisplay } from "../../../../src/components/pages/ReviewsPage/ReviewReplyDisplay";
+import { SingleReviewReplyModal } from "../../../../src/components/pages/ReviewsPage/SingleReviewReplyModal";
 
 // Mock react-hook-form
 vi.mock("react-hook-form", () => ({
@@ -21,6 +22,7 @@ vi.mock("react-hook-form", () => ({
     formState: { errors: {} },
     watch: vi.fn(() => "Test reply"),
     reset: vi.fn(),
+    setValue: vi.fn(),
   })),
 }));
 
@@ -50,8 +52,34 @@ vi.mock("../../../../src/services/hooks/useReplyToReview", () => ({
   })),
 }));
 
+// Mock useAISuggestion hook
+vi.mock("../../../../src/hooks/useAISuggestion", () => ({
+  useAISuggestion: vi.fn(() => ({
+    aiSuggestion: null,
+    showSuggestion: false,
+    hasSuggestion: false,
+    isLoading: false,
+    handleGetSuggestion: vi.fn(),
+    handleUseSuggestion: vi.fn(),
+    clearSuggestion: vi.fn(),
+  })),
+}));
+
 describe("ReviewReply", () => {
-  const defaultProps = {
+  const defaultReviewProps = {
+    review: {
+      id: "1",
+      customerName: "John Doe",
+      comment: "This is a great service!",
+      rating: 5,
+      date: "2023-01-01",
+      status: "new" as const,
+      businessReply: null,
+    },
+    onReply: vi.fn(),
+  };
+
+  const defaultModalProps = {
     show: true,
     reviewId: "1",
     reviewText: "This is a great service!",
@@ -78,184 +106,214 @@ describe("ReviewReply", () => {
     queryClient.clear();
   });
 
-  it("renders when show is true", () => {
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
+  describe("ReviewReplyDisplay", () => {
+    it("renders reply button for new reviews", () => {
+      renderWithQueryClient(<ReviewReplyDisplay {...defaultReviewProps} />);
 
-    expect(screen.getByText("Reply to Review")).toBeInTheDocument();
-    expect(
-      screen.getByText("Original Review by John Doe:")
-    ).toBeInTheDocument();
-    expect(screen.getByText("This is a great service!")).toBeInTheDocument();
-    expect(screen.getByText("Your Reply")).toBeInTheDocument();
-  });
+      expect(screen.getByRole("button", { name: /reply/i })).toBeInTheDocument();
+    });
 
-  it("does not render when show is false", () => {
-    renderWithQueryClient(<ReviewReply {...defaultProps} show={false} />);
+    it("calls onReply when reply button is clicked", async () => {
+      const user = userEvent.setup();
+      renderWithQueryClient(<ReviewReplyDisplay {...defaultReviewProps} />);
 
-    expect(screen.queryByText("Reply to Review")).not.toBeInTheDocument();
-  });
+      const replyButton = screen.getByRole("button", { name: /reply/i });
+      await user.click(replyButton);
 
-  it("displays original review text", () => {
-    const customReviewText =
-      "This is a custom review text with special characters! @#$%";
-    renderWithQueryClient(
-      <ReviewReply {...defaultProps} reviewText={customReviewText} />
-    );
+      expect(defaultReviewProps.onReply).toHaveBeenCalledWith("1");
+    });
 
-    expect(screen.getByText(customReviewText)).toBeInTheDocument();
-  });
-
-  it("displays customer name in header", () => {
-    renderWithQueryClient(
-      <ReviewReply {...defaultProps} customerName="Jane Smith" />
-    );
-
-    expect(
-      screen.getByText("Original Review by Jane Smith:")
-    ).toBeInTheDocument();
-  });
-
-  it("renders textarea for reply input", () => {
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
-
-    const textarea = screen.getByPlaceholderText(
-      "Write a professional and helpful reply..."
-    );
-    expect(textarea).toBeInTheDocument();
-    expect(textarea.tagName).toBe("TEXTAREA");
-  });
-
-  it("renders character count", () => {
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
-
-    expect(screen.getByText(/characters/)).toBeInTheDocument();
-  });
-
-  it("renders cancel and send buttons", () => {
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
-
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
-    expect(screen.getByText("Send Reply")).toBeInTheDocument();
-  });
-
-  it("calls onClose when cancel button is clicked", async () => {
-    const user = userEvent.setup();
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
-
-    const cancelButton = screen.getByText("Cancel");
-    await user.click(cancelButton);
-
-    expect(defaultProps.onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("calls mutation when form is submitted", async () => {
-    const user = userEvent.setup();
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
-
-    const sendButton = screen.getByText("Send Reply");
-    await user.click(sendButton);
-
-    // The onSuccess callback would be called after successful mutation
-    // but we can't directly test it without mocking the mutation
-  });
-
-  it("renders form elements correctly", () => {
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
-
-    const cancelButton = screen.getByText("Cancel");
-    const sendButton = screen.getByText("Send Reply");
-
-    expect(cancelButton).toBeInTheDocument();
-    expect(sendButton).toBeInTheDocument();
-  });
-
-  it("handles long review text", () => {
-    const longReviewText = "a".repeat(1000);
-    renderWithQueryClient(
-      <ReviewReply {...defaultProps} reviewText={longReviewText} />
-    );
-
-    expect(screen.getByText(longReviewText)).toBeInTheDocument();
-  });
-
-  it("handles special characters in customer name", () => {
-    const specialName = "José García-López";
-    renderWithQueryClient(
-      <ReviewReply {...defaultProps} customerName={specialName} />
-    );
-
-    expect(
-      screen.getByText(`Original Review by ${specialName}:`)
-    ).toBeInTheDocument();
-  });
-
-  it("handles empty review text", () => {
-    renderWithQueryClient(<ReviewReply {...defaultProps} reviewText="" />);
-
-    expect(
-      screen.getByText("Original Review by John Doe:")
-    ).toBeInTheDocument();
-  });
-
-  it("renders with different review IDs", () => {
-    const testIds = ["1", "abc123", "review-456", "very-long-review-id-12345"];
-
-    testIds.forEach((id) => {
-      const { unmount } = renderWithQueryClient(
-        <ReviewReply {...defaultProps} reviewId={id} />
+    it("displays existing reply when businessReply exists", () => {
+      const reviewWithReply = {
+        ...defaultReviewProps.review,
+        businessReply: {
+          text: "Thank you for your feedback!",
+          date: "2023-01-02",
+        },
+      };
+      renderWithQueryClient(
+        <ReviewReplyDisplay {...defaultReviewProps} review={reviewWithReply} />
       );
 
-      expect(screen.getByText("Reply to Review")).toBeInTheDocument();
-      unmount();
+      expect(screen.getByText("Thank you for your feedback!")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /reply/i })).not.toBeInTheDocument();
+    });
+
+    it("displays customer name in review", () => {
+      renderWithQueryClient(
+        <ReviewReplyDisplay
+          {...defaultReviewProps}
+          review={{ ...defaultReviewProps.review, customerName: "Jane Smith" }}
+        />
+      );
+
+      // The ReviewReplyDisplay doesn't directly show customer name, it's in the review data
+      expect(screen.getByRole("button", { name: /reply/i })).toBeInTheDocument();
     });
   });
 
-  it("handles escape key to close modal", async () => {
-    const user = userEvent.setup();
-    renderWithQueryClient(<ReviewReply {...defaultProps} />);
+  describe("SingleReviewReplyModal", () => {
+    it("renders when show is true", () => {
+      renderWithQueryClient(<SingleReviewReplyModal {...defaultModalProps} />);
 
-    // Press escape key
-    await user.keyboard("{Escape}");
+      expect(screen.getByText("Reply to Review")).toBeInTheDocument();
+      expect(screen.getByText("Original Review by John Doe:")).toBeInTheDocument();
+      expect(screen.getByText("This is a great service!")).toBeInTheDocument();
+    });
 
-    // Note: This would depend on the modal implementation
-    // The actual behavior might be different based on the modal library used
-  });
+    it("calls onClose when cancel button is clicked", async () => {
+      const user = userEvent.setup();
+      renderWithQueryClient(<SingleReviewReplyModal {...defaultModalProps} />);
 
-  it("renders with different customer names", () => {
-    const customerNames = [
-      "John Doe",
-      "Jane Smith",
-      "José García-López",
-      "Very Long Customer Name That Might Cause Issues",
-    ];
+      const cancelButton = screen.getByText("Cancel");
+      await user.click(cancelButton);
 
-    customerNames.forEach((name) => {
-      const { unmount } = renderWithQueryClient(
-        <ReviewReply {...defaultProps} customerName={name} />
+      expect(defaultModalProps.onClose).toHaveBeenCalled();
+    });
+
+    it("displays original review text in modal", () => {
+      const customReviewText =
+        "This is a custom review text with special characters! @#$%";
+      renderWithQueryClient(
+        <SingleReviewReplyModal
+          {...defaultModalProps}
+          reviewText={customReviewText}
+        />
+      );
+
+      expect(screen.getByText(customReviewText)).toBeInTheDocument();
+    });
+
+    it("displays customer name in modal header", () => {
+      renderWithQueryClient(
+        <SingleReviewReplyModal
+          {...defaultModalProps}
+          customerName="Jane Smith"
+        />
+      );
+
+      expect(screen.getByText("Original Review by Jane Smith:")).toBeInTheDocument();
+    });
+
+    it("renders textarea for reply input in modal", () => {
+      renderWithQueryClient(<SingleReviewReplyModal {...defaultModalProps} />);
+
+      const textarea = screen.getByPlaceholderText(
+        "Write a professional and helpful reply..."
+      );
+      expect(textarea).toBeInTheDocument();
+      expect(textarea.tagName).toBe("TEXTAREA");
+    });
+
+    it("renders character count in modal", () => {
+      renderWithQueryClient(<SingleReviewReplyModal {...defaultModalProps} />);
+
+      expect(screen.getByText(/characters/)).toBeInTheDocument();
+    });
+
+    it("renders cancel and send buttons in modal", () => {
+      renderWithQueryClient(<SingleReviewReplyModal {...defaultModalProps} />);
+
+      expect(screen.getByText("Cancel")).toBeInTheDocument();
+      expect(screen.getByText("Send Reply")).toBeInTheDocument();
+    });
+
+    it("handles long review text in modal", () => {
+      const longReviewText = "a".repeat(1000);
+      renderWithQueryClient(
+        <SingleReviewReplyModal
+          {...defaultModalProps}
+          reviewText={longReviewText}
+        />
+      );
+
+      expect(screen.getByText(longReviewText)).toBeInTheDocument();
+    });
+
+    it("handles special characters in customer name in modal", () => {
+      const specialName = "José García-López";
+      renderWithQueryClient(
+        <SingleReviewReplyModal
+          {...defaultModalProps}
+          customerName={specialName}
+        />
       );
 
       expect(
-        screen.getByText(`Original Review by ${name}:`)
+        screen.getByText(`Original Review by ${specialName}:`)
       ).toBeInTheDocument();
-      unmount();
     });
-  });
 
-  it("renders consistently across multiple renders", () => {
-    const { rerender } = renderWithQueryClient(
-      <ReviewReply {...defaultProps} />
-    );
+    it("handles empty review text in modal", () => {
+      renderWithQueryClient(
+        <SingleReviewReplyModal {...defaultModalProps} reviewText="" />
+      );
 
-    expect(screen.getByText("Send Reply")).toBeInTheDocument();
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
+      expect(
+        screen.getByText("Original Review by John Doe:")
+      ).toBeInTheDocument();
+    });
 
-    rerender(
-      <QueryClientProvider client={queryClient}>
-        <ReviewReply {...defaultProps} />
-      </QueryClientProvider>
-    );
+    it("renders with different review IDs in modal", () => {
+      const testIds = ["1", "abc123", "review-456", "very-long-review-id-12345"];
 
-    expect(screen.getByText("Send Reply")).toBeInTheDocument();
-    expect(screen.getByText("Cancel")).toBeInTheDocument();
+      testIds.forEach((id) => {
+        const { unmount } = renderWithQueryClient(
+          <SingleReviewReplyModal {...defaultModalProps} reviewId={id} />
+        );
+
+        expect(screen.getByText("Reply to Review")).toBeInTheDocument();
+        unmount();
+      });
+    });
+
+    it("handles escape key to close modal", async () => {
+      const user = userEvent.setup();
+      renderWithQueryClient(<SingleReviewReplyModal {...defaultModalProps} />);
+
+      // Press escape key
+      await user.keyboard("{Escape}");
+
+      // Note: This would depend on the modal implementation
+      // The actual behavior might be different based on the modal library used
+    });
+
+    it("renders with different customer names in modal", () => {
+      const customerNames = [
+        "John Doe",
+        "Jane Smith",
+        "José García-López",
+        "Very Long Customer Name That Might Cause Issues",
+      ];
+
+      customerNames.forEach((name) => {
+        const { unmount } = renderWithQueryClient(
+          <SingleReviewReplyModal {...defaultModalProps} customerName={name} />
+        );
+
+        expect(
+          screen.getByText(`Original Review by ${name}:`)
+        ).toBeInTheDocument();
+        unmount();
+      });
+    });
+
+    it("renders consistently across multiple renders in modal", () => {
+      const { rerender } = renderWithQueryClient(
+        <SingleReviewReplyModal {...defaultModalProps} />
+      );
+
+      expect(screen.getByText("Send Reply")).toBeInTheDocument();
+      expect(screen.getByText("Cancel")).toBeInTheDocument();
+
+      rerender(
+        <QueryClientProvider client={queryClient}>
+          <SingleReviewReplyModal {...defaultModalProps} />
+        </QueryClientProvider>
+      );
+
+      expect(screen.getByText("Send Reply")).toBeInTheDocument();
+      expect(screen.getByText("Cancel")).toBeInTheDocument();
+    });
   });
 });

@@ -1,14 +1,14 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { ReviewList } from "../../../../src/components/reviews/ReviewList";
+import { ReviewList } from "../../../../src/components/common";
 import type {
   Review,
   Pagination as PaginationType,
 } from "../../../../src/services/types";
 
 // Mock the child components
-vi.mock("../../../../src/components/reviews/ReviewCard/ReviewCard", () => ({
+vi.mock("../../../../src/components/pages/ReviewsPage/ReviewCard", () => ({
   ReviewCard: ({ review, onReply }: any) => (
     <div data-testid={`review-card-${review.id}`}>
       <div>{review.customerName}</div>
@@ -18,7 +18,7 @@ vi.mock("../../../../src/components/reviews/ReviewCard/ReviewCard", () => ({
   ),
 }));
 
-vi.mock("../../../../src/components/reviews/ReviewPagination", () => ({
+vi.mock("../../../../src/components/common/ReviewPagination", () => ({
   ReviewPagination: ({ pagination, onPageChange }: any) => (
     <div data-testid="pagination">
       <div>

@@ -2,7 +2,10 @@ import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { useLocationProfileData } from "@/hooks";
-import { LocationHygiene, LocationReviews } from "@/components/locations";
+import {
+  LocationHygiene,
+  LocationReviews,
+} from "@/components/pages/LocationPage";
 import {
   ArrowLeft,
   MapPin,

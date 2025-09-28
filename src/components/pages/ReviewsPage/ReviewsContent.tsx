@@ -1,10 +1,5 @@
-/**
- * Reviews Content Component
- * Handles the main content area of the reviews page
- */
-
 import React from "react";
-import { ReviewList } from "../ReviewList";
+import { ReviewList } from "@/components/common";
 import { COLORS } from "@/styles/design-system";
 import type { Review, Pagination as PaginationType } from "@/services/types";
 import type { FilterState } from "@/hooks/useReviewsFilters";
@@ -15,7 +10,7 @@ interface ReviewsContentProps {
   loading: boolean;
   error?: string;
   filterState: FilterState;
-  onReply: (reviewId: string) => void;
+  onReply: (review: Review) => void;
   onPageChange: (page: number) => void;
 }
 

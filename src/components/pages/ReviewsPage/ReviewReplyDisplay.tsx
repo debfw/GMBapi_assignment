@@ -1,8 +1,3 @@
-/**
- * Review Reply Component
- * Displays existing replies or reply button
- */
-
 import React from "react";
 import { Button } from "react-bootstrap";
 import { MessageCircle } from "lucide-react";
@@ -11,10 +6,10 @@ import type { Review } from "@/services/types";
 
 interface ReviewReplyProps {
   review: Review;
-  onReply: (reviewId: string) => void;
+  onReply: (review: Review) => void;
 }
 
-export const ReviewReply: React.FC<ReviewReplyProps> = React.memo(
+export const ReviewReplyDisplay: React.FC<ReviewReplyProps> = React.memo(
   ({ review, onReply }) => {
     return (
       <>
@@ -45,7 +40,7 @@ export const ReviewReply: React.FC<ReviewReplyProps> = React.memo(
               <Button
                 variant="outline-primary"
                 size="sm"
-                onClick={() => onReply(review.id)}
+                onClick={() => onReply(review)}
                 className="d-flex align-items-center"
               >
                 <MessageCircle size={16} className="me-1" />

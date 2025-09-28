@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { ReviewCard } from "../../../../src/components/reviews/ReviewCard";
+import { ReviewCard } from "../../../../src/components/pages/ReviewsPage";
 import type { Review } from "../../../../src/services/types";
 
 // Mock the utility functions
@@ -52,7 +52,9 @@ describe("ReviewCard", () => {
         "This is a great service! I highly recommend it to everyone."
       )
     ).toBeInTheDocument();
-    expect(screen.getByText("Relative: 2024-01-15T00:00:00Z")).toBeInTheDocument();
+    expect(
+      screen.getByText("Relative: 2024-01-15T00:00:00Z")
+    ).toBeInTheDocument();
   });
 
   it("renders star rating correctly", () => {
@@ -172,7 +174,9 @@ describe("ReviewCard", () => {
     expect(
       screen.getByText("Thank you for your feedback!")
     ).toBeInTheDocument();
-    expect(screen.getByText("(Relative: 2024-01-16T00:00:00Z)")).toBeInTheDocument();
+    expect(
+      screen.getByText("(Relative: 2024-01-16T00:00:00Z)")
+    ).toBeInTheDocument();
   });
 
   it("renders location name when provided", () => {
@@ -212,10 +216,7 @@ describe("ReviewCard", () => {
 
     const replyButton = screen.getByRole("button", { name: /Reply/i });
     expect(replyButton).toBeInTheDocument();
-    expect(replyButton).toHaveClass(
-      "btn",
-      "btn-outline-primary"
-    );
+    expect(replyButton).toHaveClass("btn", "btn-outline-primary");
   });
 
   it("does not render reply button for non-new reviews", () => {
@@ -226,7 +227,9 @@ describe("ReviewCard", () => {
       />
     );
 
-    expect(screen.queryByRole("button", { name: /Reply/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Reply/i })
+    ).not.toBeInTheDocument();
 
     rerender(
       <ReviewCard
@@ -235,7 +238,9 @@ describe("ReviewCard", () => {
       />
     );
 
-    expect(screen.queryByRole("button", { name: /Reply/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Reply/i })
+    ).not.toBeInTheDocument();
   });
 
   it("calls onReply when reply button is clicked", () => {

@@ -1,8 +1,3 @@
-/**
- * Review Selection Component for Bulk Reply Modal
- * Handles the selection of reviews to reply to
- */
-
 import React, { useMemo } from "react";
 import { Card, Badge, Button } from "react-bootstrap";
 import { CheckCircle } from "lucide-react";

@@ -1,16 +1,11 @@
-/**
- * Refactored Reviews Page
- * Uses smaller components and the new service layer
- */
-
 import React, { useState, useCallback, useEffect } from "react";
 import { Sidebar } from "@/components/layout/Sidebar";
-import { ReviewReply } from "../ReviewReply";
-import { BulkReplyModal } from "../BulkReply/BulkReplyModal";
-import { ReviewsHeader } from "../ReviewsHeader";
-import { ReviewsFilters } from "../ReviewsFilters";
+import { SingleReviewReplyModal } from "./SingleReviewReplyModal";
+import { BulkReplyModal } from "./BulkReplyModal";
+import { ReviewsHeader, ReviewsFilters } from "@/components/common";
 import { ReviewsContent } from "./ReviewsContent";
 import { useReviews, useReviewsFilters } from "@/hooks";
+import type { Review } from "@/services/types";
 
 export const ReviewsPage: React.FC = () => {
   const [selectedReview, setSelectedReview] = useState<{
@@ -22,7 +17,6 @@ export const ReviewsPage: React.FC = () => {
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [showBulkReplyModal, setShowBulkReplyModal] = useState(false);
 
-  // Use the original working hooks
   const {
     filters,
     filterState,
@@ -32,32 +26,21 @@ export const ReviewsPage: React.FC = () => {
     setFilters,
   } = useReviewsFilters();
 
-  const reviewsMutation = useReviews();
+  const { mutate, data, error, isPending } = useReviews();
 
-  // Single effect to handle both initial load and filter changes
   useEffect(() => {
-    reviewsMutation.mutate({ data: filters });
-  }, [filters.star_rating, filters.has_reply, filters.page, filters.per_page]);
+    mutate({ data: filters });
+  }, [filters, mutate]);
 
-  // Handle review selection for reply
-  const handleReplyClick = useCallback(
-    (reviewId: string) => {
-      const review = reviewsMutation.data?.reviews.find(
-        (r) => r.id === reviewId
-      );
-      if (review) {
-        setSelectedReview({
-          id: review.id,
-          text: review.comment,
-          customerName: review.customerName,
-        });
-        setShowReplyModal(true);
-      }
-    },
-    [reviewsMutation.data]
-  );
+  const handleReplyClick = useCallback((review: Review) => {
+    setSelectedReview({
+      id: review.id,
+      text: review.comment,
+      customerName: review.customerName,
+    });
+    setShowReplyModal(true);
+  }, []);
 
-  // Handle modal close
   const handleCloseReplyModal = useCallback(() => {
     setShowReplyModal(false);
     setSelectedReview(null);
@@ -67,27 +50,22 @@ export const ReviewsPage: React.FC = () => {
     setShowBulkReplyModal(false);
   }, []);
 
-  // Handle bulk reply
   const handleBulkReply = useCallback(() => {
     setShowBulkReplyModal(true);
   }, []);
 
-  // Handle refresh
   const handleRefreshReviews = useCallback(() => {
-    reviewsMutation.mutate({ data: filters });
-  }, [reviewsMutation, filters]);
+    mutate({ data: filters });
+  }, [mutate, filters]);
 
-  // Handle successful reply
   const handleReplySuccess = useCallback(() => {
-    reviewsMutation.mutate({ data: filters });
-  }, [reviewsMutation, filters]);
+    mutate({ data: filters });
+  }, [mutate, filters]);
 
-  // Handle bulk reply success
   const handleBulkReplySuccess = useCallback(() => {
-    reviewsMutation.mutate({ data: filters });
-  }, [reviewsMutation, filters]);
+    mutate({ data: filters });
+  }, [mutate, filters]);
 
-  // Handle page change
   const handlePageChange = useCallback(
     (page: number) => {
       setFilters({ ...filters, page });
@@ -95,18 +73,8 @@ export const ReviewsPage: React.FC = () => {
     [filters, setFilters]
   );
 
-  // Handle export/import (placeholder)
-  const handleExportReviews = useCallback(() => {
-    // Export functionality not yet available
-  }, []);
-
-  const handleImportReviews = useCallback(() => {
-    // Import functionality not yet available
-  }, []);
-
-  // Get data with defaults
-  const reviews = reviewsMutation.data?.reviews || [];
-  const pagination = reviewsMutation.data?.pagination || {
+  const reviews = data?.reviews || [];
+  const pagination = data?.pagination || {
     page: 1,
     limit: 20,
     total: 0,
@@ -129,7 +97,7 @@ export const ReviewsPage: React.FC = () => {
           {/* Header Section */}
           <div className="content-section">
             <ReviewsHeader />
-            {reviewsMutation.error && (
+            {error && (
               <div
                 style={{
                   backgroundColor: "#fef3cd",
@@ -140,8 +108,7 @@ export const ReviewsPage: React.FC = () => {
                   color: "#92400e",
                 }}
               >
-                🚨 API Error:{" "}
-                {(reviewsMutation.error as any)?.message || "An error occurred"}
+                🚨 API Error: {(error as any)?.message || "An error occurred"}
               </div>
             )}
           </div>
@@ -154,8 +121,8 @@ export const ReviewsPage: React.FC = () => {
               onClearFilters={handleClearFilters}
               onReplyStatusChange={handleReplyStatusChange}
               onBulkReply={handleBulkReply}
-              onExportReviews={handleExportReviews}
-              onImportReviews={handleImportReviews}
+              onExportReviews={() => {}}
+              onImportReviews={() => {}}
               onRefreshReviews={handleRefreshReviews}
             />
           </div>
@@ -164,10 +131,10 @@ export const ReviewsPage: React.FC = () => {
           <ReviewsContent
             reviews={reviews}
             pagination={pagination}
-            loading={reviewsMutation.isPending}
+            loading={isPending}
             error={
-              reviewsMutation.error && !reviewsMutation.data
-                ? (reviewsMutation.error as any)?.message || "An error occurred"
+              error && !data
+                ? (error as any)?.message || "An error occurred"
                 : undefined
             }
             filterState={filterState}
@@ -178,16 +145,14 @@ export const ReviewsPage: React.FC = () => {
       </div>
 
       {/* Modals */}
-      {selectedReview && (
-        <ReviewReply
-          show={showReplyModal}
-          reviewId={selectedReview.id}
-          reviewText={selectedReview.text}
-          customerName={selectedReview.customerName}
-          onClose={handleCloseReplyModal}
-          onSuccess={handleReplySuccess}
-        />
-      )}
+      <SingleReviewReplyModal
+        show={showReplyModal && selectedReview !== null}
+        reviewId={selectedReview?.id || ""}
+        reviewText={selectedReview?.text || ""}
+        customerName={selectedReview?.customerName || ""}
+        onClose={handleCloseReplyModal}
+        onSuccess={handleReplySuccess}
+      />
 
       <BulkReplyModal
         show={showBulkReplyModal}

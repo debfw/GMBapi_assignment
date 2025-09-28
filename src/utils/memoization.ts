@@ -1,8 +1,3 @@
-/**
- * Memoization utilities for React components
- * Provides optimized memoization patterns to prevent unnecessary re-renders
- */
-
 import { useMemo, useCallback, memo } from "react";
 
 /**
@@ -72,7 +67,10 @@ export const useFilteredData = <T>(
   filterFn: (item: T) => boolean,
   dependencies: React.DependencyList
 ): T[] => {
-  return useMemo(() => data.filter(filterFn), [data, filterFn, ...dependencies]);
+  return useMemo(
+    () => data.filter(filterFn),
+    [data, filterFn, ...dependencies]
+  );
 };
 
 /**
@@ -100,7 +98,7 @@ export const usePaginatedData = <T>(
     const endIndex = startIndex + pageSize;
     const paginatedData = data.slice(startIndex, endIndex);
     const totalPages = Math.ceil(data.length / pageSize);
-    
+
     return { paginatedData, totalPages };
   }, [data, page, pageSize, ...dependencies]);
 };
@@ -116,7 +114,7 @@ export const useSearchResults = <T>(
 ): T[] => {
   return useMemo(() => {
     if (!searchTerm.trim()) return data;
-    return data.filter(item => searchFn(item, searchTerm));
+    return data.filter((item) => searchFn(item, searchTerm));
   }, [data, searchTerm, searchFn, ...dependencies]);
 };
 

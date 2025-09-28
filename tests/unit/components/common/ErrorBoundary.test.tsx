@@ -9,7 +9,7 @@ import {
   beforeAll,
   afterAll,
 } from "vitest";
-import { ErrorBoundary } from "../../../../src/components/common/ErrorBoundary";
+import { ErrorBoundary } from "../../../../src/components/common";
 
 // Component that throws an error
 const ThrowError = ({ shouldThrow }: { shouldThrow: boolean }) => {

@@ -1,8 +1,3 @@
-/**
- * Reply Form Component for Bulk Reply Modal
- * Handles the reply text input and validation
- */
-
 import React from "react";
 import { Form } from "react-bootstrap";
 import { useForm } from "react-hook-form";
@@ -29,15 +24,24 @@ interface ReplyFormProps {
   characterCount: number;
   isSubmitting: boolean;
   selectedCount: number;
+  aiSuggestion?: string;
+  onUseSuggestion?: (suggestion: string) => void;
 }
 
 export const ReplyForm: React.FC<ReplyFormProps> = React.memo(
-  ({ onSubmit, onTextChange, characterCount }) => {
+  ({
+    onSubmit,
+    onTextChange,
+    characterCount,
+    aiSuggestion,
+    onUseSuggestion,
+  }) => {
     const {
       register,
       handleSubmit,
       formState: { errors },
       watch,
+      setValue,
     } = useForm<BulkReplyFormData>({
       resolver: zodResolver(bulkReplySchema),
       defaultValues: {
@@ -50,6 +54,13 @@ export const ReplyForm: React.FC<ReplyFormProps> = React.memo(
     React.useEffect(() => {
       onTextChange(watchedText.length);
     }, [watchedText, onTextChange]);
+
+    React.useEffect(() => {
+      if (aiSuggestion && onUseSuggestion) {
+        setValue("text", aiSuggestion);
+        onUseSuggestion(aiSuggestion);
+      }
+    }, [aiSuggestion, onUseSuggestion, setValue]);
 
     const isOverLimit = characterCount > REPLY_LIMITS.MAX_LENGTH;
     const remainingChars = REPLY_LIMITS.MAX_LENGTH - characterCount;

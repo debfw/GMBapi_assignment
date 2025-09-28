@@ -1,8 +1,3 @@
-/**
- * Domain-specific types for the Reviews Manager application
- * These types provide a clean abstraction layer over the generated API types
- */
-
 // Domain-specific types that extend the generated API types
 
 // Domain-specific review types
@@ -83,13 +78,15 @@ export interface ApiError {
 }
 
 // Service result types
-export type ServiceResult<T> = {
-  success: true;
-  data: T;
-} | {
-  success: false;
-  error: ApiError;
-};
+export type ServiceResult<T> =
+  | {
+      success: true;
+      data: T;
+    }
+  | {
+      success: false;
+      error: ApiError;
+    };
 
 // Bulk operation types
 export interface BulkReplyRequest {

@@ -1,18 +1,13 @@
-/**
- * Refactored Review Card Component
- * Uses smaller, focused components for better maintainability
- */
-
 import React from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewContent } from "./ReviewContent";
-import { ReviewReply } from "./ReviewReply";
+import { ReviewReplyDisplay } from "./ReviewReplyDisplay";
 import type { Review } from "@/services/types";
 
 interface ReviewCardProps {
   review: Review;
-  onReply: (reviewId: string) => void;
+  onReply: (review: Review) => void;
   className?: string;
 }
 
@@ -29,7 +24,7 @@ export const ReviewCard: React.FC<ReviewCardProps> = React.memo(
               <ReviewContent review={review} />
             </Col>
             <Col xs={4} className="review-card-reply-section">
-              <ReviewReply review={review} onReply={onReply} />
+              <ReviewReplyDisplay review={review} onReply={onReply} />
             </Col>
           </Row>
         </Card.Body>

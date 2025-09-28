@@ -3,11 +3,12 @@ import { Modal, Form, Button, Alert } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { MessageCircle, Send, X, Lightbulb } from "lucide-react";
+import { MessageCircle, Send, X } from "lucide-react";
 import { REPLY_LIMITS } from "@/utils/constants";
 import { useMutation } from "@tanstack/react-query";
-import { getReviewSuggestionMutationOptions } from "@/services/hooks/useGetReviewSuggestion";
 import { replyToReviewMutationOptions } from "@/services/hooks/useReplyToReview";
+import { useAISuggestion } from "@/hooks/useAISuggestion";
+import { AISuggestionDisplay } from "@/components/common/AISuggestionDisplay";
 
 const replySchema = z.object({
   text: z
@@ -31,7 +32,7 @@ interface ReviewReplyProps {
   onSuccess?: () => void;
 }
 
-export const ReviewReply: React.FC<ReviewReplyProps> = ({
+export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
   show,
   reviewId,
   reviewText,
@@ -44,13 +45,18 @@ export const ReviewReply: React.FC<ReviewReplyProps> = ({
   const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
     null
   );
-  const [aiSuggestion, setAiSuggestion] = useState<string>("");
-  const [showSuggestion, setShowSuggestion] = useState(false);
-  const [hasSuggestion, setHasSuggestion] = useState(false);
   const [showApiWarning, setShowApiWarning] = useState(false);
 
-  const suggestionMutation = useMutation({
-    ...getReviewSuggestionMutationOptions(),
+  const {
+    aiSuggestion,
+    showSuggestion,
+    hasSuggestion,
+    isLoading: isSuggestionLoading,
+    handleGetSuggestion: getSuggestion,
+    handleUseSuggestion,
+    clearSuggestion,
+  } = useAISuggestion({
+    onSuggestionUsed: (suggestion) => setValue("text", suggestion),
   });
 
   const replyMutation = useMutation({
@@ -97,9 +103,7 @@ export const ReviewReply: React.FC<ReviewReplyProps> = ({
   const handleClose = () => {
     reset();
     setCharacterCount(0);
-    setAiSuggestion("");
-    setShowSuggestion(false);
-    setHasSuggestion(false);
+    clearSuggestion();
     setShowApiWarning(false);
     onClose();
   };
@@ -107,34 +111,8 @@ export const ReviewReply: React.FC<ReviewReplyProps> = ({
   const isOverLimit = characterCount > REPLY_LIMITS.MAX_LENGTH;
   const remainingChars = REPLY_LIMITS.MAX_LENGTH - characterCount;
 
-  const handleGetSuggestion = async () => {
-    if (!reviewText.trim()) return;
-
-    try {
-      const result = await suggestionMutation.mutateAsync({
-        data: { review: reviewText },
-      });
-
-      if (
-        result?.msg &&
-        result.msg.length > 0 &&
-        result.msg[0]?.message?.content
-      ) {
-        const suggestion = result.msg[0].message.content;
-        setAiSuggestion(suggestion);
-        setShowSuggestion(true);
-        setHasSuggestion(true);
-      }
-    } catch (error) {
-    }
-  };
-
-  const handleUseSuggestion = () => {
-    if (aiSuggestion) {
-      setValue("text", aiSuggestion);
-      setShowSuggestion(false);
-      setHasSuggestion(false);
-    }
+  const handleGetSuggestion = () => {
+    getSuggestion(reviewText);
   };
 
   const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -175,26 +153,6 @@ export const ReviewReply: React.FC<ReviewReplyProps> = ({
           <div className="p-4 rounded-3 review-reply-original">
             <p className="mb-0 text-dark">{reviewText}</p>
           </div>
-
-          {showSuggestion && aiSuggestion && (
-            <div
-              className="mt-3 p-3 rounded-3"
-              style={{
-                backgroundColor: "#f8f9fa",
-                border: "1px solid #e9ecef",
-              }}
-            >
-              <h6 className="text-muted mb-2 fw-medium small">
-                AI Suggestion:
-              </h6>
-              <p
-                className="mb-0 text-muted"
-                style={{ fontStyle: "italic", fontSize: "0.9rem" }}
-              >
-                {aiSuggestion}
-              </p>
-            </div>
-          )}
         </div>
 
         {showApiWarning && (
@@ -205,54 +163,32 @@ export const ReviewReply: React.FC<ReviewReplyProps> = ({
           </Alert>
         )}
 
+        <AISuggestionDisplay
+          suggestion={aiSuggestion}
+          showSuggestion={showSuggestion}
+          hasSuggestion={hasSuggestion}
+          isLoading={isSuggestionLoading}
+          onGetSuggestion={handleGetSuggestion}
+          onUseSuggestion={handleUseSuggestion}
+          disabled={isTyping || !reviewText.trim()}
+          className="mb-4"
+        />
+
         <Form onSubmit={handleSubmit(handleFormSubmit)}>
-          <Form.Group className="mb-5">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <Form.Label className="fw-medium mb-0">Your Reply</Form.Label>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={
-                  hasSuggestion ? handleUseSuggestion : handleGetSuggestion
-                }
-                disabled={
-                  isTyping || !reviewText.trim() || suggestionMutation.isPending
-                }
-                className="d-flex align-items-center"
-              >
-                <Lightbulb size={16} className="me-2" />
-                {suggestionMutation.isPending
-                  ? "Getting suggestion..."
-                  : hasSuggestion
-                    ? "Use the AI reply?"
-                    : "Get Suggestion"}
-              </Button>
-            </div>
-            <div className="position-relative">
-              <Form.Control
-                as="textarea"
-                rows={6}
-                placeholder="Write a professional and helpful reply..."
-                {...register("text")}
-                onChange={handleTextChange}
-                isInvalid={!!errors.text}
-                className="review-reply-textarea"
-              />
-              <div className="position-absolute review-reply-grammar-icon">
-                G
-              </div>
-            </div>
+          <Form.Group className="mb-4">
+            <Form.Label className="fw-medium mb-3">Reply Text</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={4}
+              placeholder="Write a professional and helpful reply..."
+              {...register("text")}
+              onChange={handleTextChange}
+              isInvalid={!!errors.text}
+              className="bulk-reply-textarea"
+            />
             <Form.Control.Feedback type="invalid" className="mt-2">
               {errors.text?.message}
             </Form.Control.Feedback>
-            {suggestionMutation.error && (
-              <Alert variant="danger" className="mt-2 small">
-                Failed to get suggestion:{" "}
-                {suggestionMutation.error instanceof Error
-                  ? suggestionMutation.error.message
-                  : "Unknown error"}
-              </Alert>
-            )}
             <div className="d-flex justify-content-between mt-3">
               <Form.Text
                 className={isOverLimit ? "text-danger" : "text-muted small"}
@@ -268,7 +204,7 @@ export const ReviewReply: React.FC<ReviewReplyProps> = ({
             </div>
           </Form.Group>
 
-          <Form.Group className="mb-5">
+          <Form.Group className="mb-4">
             <Form.Check
               type="checkbox"
               label="Make this reply public (visible to customers)"
@@ -276,7 +212,7 @@ export const ReviewReply: React.FC<ReviewReplyProps> = ({
               className="mb-3"
             />
             <Form.Text className="text-muted small">
-              Public replies will be visible to the customer and other potential
+              Public replies will be visible to customers and other potential
               customers.
             </Form.Text>
           </Form.Group>

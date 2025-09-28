@@ -1,8 +1,3 @@
-/**
- * Review Header Component
- * Displays customer information, rating, and status
- */
-
 import React from "react";
 import { Badge, Image } from "react-bootstrap";
 import { Star, Clock, User } from "lucide-react";

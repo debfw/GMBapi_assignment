@@ -1,19 +1,12 @@
-/**
- * Refactored Bulk Reply Modal
- * Uses smaller, focused components and the new service layer
- */
-
 import React, { useState, useEffect, useCallback } from "react";
 import { Modal, Button } from "react-bootstrap";
 import { Send, X, Users } from "lucide-react";
 import { ReviewSelection } from "./ReviewSelection";
-import { AISuggestion } from "./AISuggestion";
 import { ReplyForm } from "./ReplyForm";
 import { useMutation } from "@tanstack/react-query";
-import {
-  getReviewSuggestionMutationOptions,
-  replyToReviewMutationOptions,
-} from "@/services/hooks";
+import { replyToReviewMutationOptions } from "@/services/hooks";
+import { useAISuggestion } from "@/hooks/useAISuggestion";
+import { AISuggestionDisplay } from "@/components/common/AISuggestionDisplay";
 import type { Review } from "@/services/types";
 
 interface BulkReplyModalProps {
@@ -34,17 +27,17 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
       new Set()
     );
     const [characterCount, setCharacterCount] = useState(0);
-    const [aiSuggestion, setAiSuggestion] = useState<string>("");
-    const [showSuggestion, setShowSuggestion] = useState(false);
-    const [hasSuggestion, setHasSuggestion] = useState(false);
     const [showApiWarning, setShowApiWarning] = useState(false);
 
-    const suggestionMutation = useMutation({
-      ...getReviewSuggestionMutationOptions(),
-      onError: (_error) => {
-        console.error(_error);
-      },
-    });
+    const {
+      aiSuggestion,
+      showSuggestion,
+      hasSuggestion,
+      isLoading: isSuggestionLoading,
+      handleGetSuggestion: getSuggestion,
+      handleUseSuggestion,
+      clearSuggestion,
+    } = useAISuggestion();
 
     const replyMutation = useMutation({
       ...replyToReviewMutationOptions(),
@@ -64,12 +57,10 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
       }
     }, [show, reviews]);
 
-    // Handle form submission
     const handleFormSubmit = useCallback(
       async (data: BulkReplyFormData) => {
         if (selectedReviews.size === 0) return;
 
-        // Process each selected review
         for (const reviewId of selectedReviews) {
           const review = reviews.find((r) => r.id === reviewId);
           if (review) {
@@ -82,6 +73,7 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
                 },
               });
             } catch (error) {
+              console.error(error);
               // Failed to reply to review
               // Continue with next review even if one fails
             }
@@ -95,53 +87,23 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
       [selectedReviews, reviews, replyMutation, onSuccess]
     );
 
-    // Handle modal close
     const handleClose = useCallback(() => {
       setSelectedReviews(new Set());
       setCharacterCount(0);
-      setAiSuggestion("");
-      setShowSuggestion(false);
-      setHasSuggestion(false);
+      clearSuggestion();
       setShowApiWarning(false);
       onClose();
-    }, [onClose]);
+    }, [onClose, clearSuggestion]);
 
-    // Handle AI suggestion
-    const handleGetSuggestion = useCallback(async () => {
+    const handleGetSuggestion = useCallback(() => {
       if (selectedReviews.size === 0) return;
 
       const firstReview = reviews.find((r) => selectedReviews.has(r.id));
       if (!firstReview) return;
 
-      try {
-        const result = await suggestionMutation.mutateAsync({
-          data: { review: firstReview.comment },
-        });
+      getSuggestion(firstReview.comment);
+    }, [selectedReviews, reviews, getSuggestion]);
 
-        if (
-          result?.msg &&
-          result.msg.length > 0 &&
-          result.msg[0]?.message?.content
-        ) {
-          const suggestion = result.msg[0].message.content;
-          setAiSuggestion(suggestion);
-          setShowSuggestion(true);
-          setHasSuggestion(true);
-        }
-      } catch (error) {
-        // Failed to get suggestion
-      }
-    }, [selectedReviews, reviews, suggestionMutation]);
-
-    const handleUseSuggestion = useCallback(() => {
-      if (aiSuggestion) {
-        setShowSuggestion(false);
-        setHasSuggestion(false);
-        // The suggestion will be handled by the form component
-      }
-    }, [aiSuggestion]);
-
-    // Handle review selection
     const handleSelectAll = useCallback(() => {
       const replyableReviews = reviews.filter(
         (review) => review.status === "new"
@@ -167,7 +129,7 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
       });
     }, []);
 
-    const isOverLimit = characterCount > 1000; // REPLY_LIMITS.MAX_LENGTH
+    const isOverLimit = characterCount > 1000;
     const isSubmitting = replyMutation.isPending;
 
     return (
@@ -193,14 +155,16 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
             onSelectReview={handleSelectReview}
           />
 
-          <AISuggestion
+          <AISuggestionDisplay
             suggestion={aiSuggestion}
             showSuggestion={showSuggestion}
             hasSuggestion={hasSuggestion}
-            isLoading={suggestionMutation.isPending}
-            selectedCount={selectedReviews.size}
+            isLoading={isSuggestionLoading}
             onGetSuggestion={handleGetSuggestion}
             onUseSuggestion={handleUseSuggestion}
+            disabled={selectedReviews.size === 0}
+            buttonText={`Get Suggestion for ${selectedReviews.size} Reviews`}
+            className="mb-3"
           />
 
           {showApiWarning && (
@@ -223,6 +187,8 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
             characterCount={characterCount}
             isSubmitting={isSubmitting}
             selectedCount={selectedReviews.size}
+            aiSuggestion={aiSuggestion}
+            onUseSuggestion={handleUseSuggestion}
           />
         </Modal.Body>
 

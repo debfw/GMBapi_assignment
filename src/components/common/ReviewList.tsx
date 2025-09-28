@@ -1,6 +1,6 @@
 import React from "react";
 import { Container, Alert, Row, Col } from "react-bootstrap";
-import { ReviewCard } from "./ReviewCard/ReviewCard";
+import { ReviewCard } from "@/components/pages/ReviewsPage/ReviewCard";
 import { ReviewPagination } from "./ReviewPagination";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useStableCallback } from "@/utils/memoization";
@@ -12,7 +12,7 @@ interface ReviewListProps {
   pagination?: PaginationType;
   loading?: boolean;
   error?: string;
-  onReply: (reviewId: string) => void;
+  onReply: (review: Review) => void;
   onPageChange?: (page: number) => void;
   className?: string;
   filterState?: FilterState;
@@ -29,7 +29,6 @@ export const ReviewList: React.FC<ReviewListProps> = React.memo(
     className = "",
     filterState,
   }) => {
-    // Memoize the reply handler to prevent unnecessary re-renders
     const handleReply = useStableCallback(onReply);
     if (loading) {
       return (

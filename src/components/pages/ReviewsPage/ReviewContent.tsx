@@ -1,8 +1,3 @@
-/**
- * Review Content Component
- * Displays the review text with expand/collapse functionality
- */
-
 import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 import { formatDate } from "@/utils/formatting";
