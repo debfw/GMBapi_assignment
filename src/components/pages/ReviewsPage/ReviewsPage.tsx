@@ -27,11 +27,11 @@ export const ReviewsPage: React.FC = () => {
     openBulk,
     closeBulk,
   } = useModalContext();
-  const [searchTerm, setSearchTerm] = useState("");
-
   const {
     filters,
     filterState,
+    debouncedSearchTerm,
+    handleSearchChange,
     handleStarRatingChange,
     handleClearFilters,
     handleReplyStatusChange,
@@ -90,7 +90,18 @@ export const ReviewsPage: React.FC = () => {
 
   const reviews = data?.reviews || [];
 
-  const filteredReviews = reviews;
+  const filteredReviews = useMemo(() => {
+    const query = debouncedSearchTerm?.toLowerCase().trim();
+    if (!query) return reviews;
+    return reviews.filter((review) => {
+      const haystacks = [
+        review.comment || "",
+        review.customerName || "",
+        review.locationName || "",
+      ];
+      return haystacks.some((text) => text.toLowerCase().includes(query));
+    });
+  }, [reviews, debouncedSearchTerm]);
 
   const pagination = data?.pagination || {
     page: 1,
@@ -124,8 +135,8 @@ export const ReviewsPage: React.FC = () => {
               onReplyStatusChange={handleReplyStatusChange}
               onBulkReply={openBulk}
               onRefreshReviews={handleRefreshReviews}
-              searchTerm={searchTerm}
-              onSearchChange={setSearchTerm}
+              searchTerm={filterState.searchTerm}
+              onSearchChange={handleSearchChange}
             />
           </div>
 
@@ -142,7 +153,7 @@ export const ReviewsPage: React.FC = () => {
             filterState={filterState}
             onReply={handleReplyClick}
             onPageChange={handlePageChange}
-            isSearching={false}
+            isSearching={Boolean(filterState.searchTerm?.trim())}
           />
         </div>
       </div>
