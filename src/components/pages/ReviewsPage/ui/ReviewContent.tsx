@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Button } from "react-bootstrap";
 import { formatDate } from "@/utils/formatting";
 import { truncateText } from "@/utils/formatting";
-import type { Review } from "@/services/types";
+import type { ReviewDomain } from "@/services/domain/types";
 
 interface ReviewContentProps {
-  review: Review;
+  review: ReviewDomain;
 }
 
 export const ReviewContent: React.FC<ReviewContentProps> = React.memo(

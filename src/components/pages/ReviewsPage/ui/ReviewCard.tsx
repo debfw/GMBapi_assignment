@@ -3,11 +3,11 @@ import { Card, Row, Col } from "react-bootstrap";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewContent } from "./ReviewContent";
 import { ReviewReplyDisplay } from "./ReviewReplyDisplay";
-import type { Review } from "@/services/types";
+import type { ReviewDomain } from "@/services/domain/types";
 
 interface ReviewCardProps {
-  review: Review;
-  onReply: (review: Review) => void;
+  review: ReviewDomain;
+  onReply: (review: ReviewDomain) => void;
   className?: string;
 }
 

@@ -1,7 +1,8 @@
 import {
   transformRawReview,
   transformReviewListResponse,
-} from "@/utils/apiTransformers";
+} from "../../../src/utils/apiTransformers";
+import { describe, it, expect } from "vitest";
 
 describe("apiTransformers", () => {
   describe("transformRawReview", () => {

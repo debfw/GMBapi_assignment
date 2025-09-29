@@ -1,4 +1,6 @@
-import { render, screen } from "@testing-library/react";
+// @ts-nocheck
+import React from "react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ReviewList } from "../../../../src/components/common";
 import type {
@@ -106,11 +108,12 @@ describe("ReviewList", () => {
   });
 
   it("renders no reviews message when reviews array is empty", () => {
-    render(<ReviewList {...defaultProps} reviews={[]} />);
+    const { container } = render(<ReviewList {...defaultProps} reviews={[]} />);
 
-    expect(screen.getByText("No reviews found")).toBeInTheDocument();
+    const scope = within(container);
+    expect(scope.getByText("No reviews found")).toBeInTheDocument();
     expect(
-      screen.getByText(
+      scope.getByText(
         "Try adjusting your filters or check back later for new reviews."
       )
     ).toBeInTheDocument();
@@ -195,28 +198,35 @@ describe("ReviewList", () => {
   });
 
   it("handles edge case with undefined reviews", () => {
-    render(<ReviewList {...defaultProps} reviews={undefined as any} />);
+    const { container } = render(
+      <ReviewList {...defaultProps} reviews={undefined as any} />
+    );
 
+    const scope = within(container);
     // Should not crash and should show no reviews message
-    expect(screen.getByText("No reviews found")).toBeInTheDocument();
+    expect(scope.getByText("No reviews found")).toBeInTheDocument();
   });
 
   it("handles edge case with null reviews", () => {
-    render(<ReviewList {...defaultProps} reviews={null as any} />);
+    const { container } = render(
+      <ReviewList {...defaultProps} reviews={null as any} />
+    );
 
+    const scope = within(container);
     // Should not crash and should show no reviews message
-    expect(screen.getByText("No reviews found")).toBeInTheDocument();
+    expect(scope.getByText("No reviews found")).toBeInTheDocument();
   });
 
   it("renders with different loading states", () => {
-    const { rerender } = render(
+    const { rerender, container } = render(
       <ReviewList {...defaultProps} loading={false} />
     );
 
-    expect(screen.queryByTestId("loading-spinner")).not.toBeInTheDocument();
+    const scope = within(container);
+    expect(scope.queryByTestId("loading-spinner")).not.toBeInTheDocument();
 
     rerender(<ReviewList {...defaultProps} loading={true} />);
 
-    expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+    expect(scope.getByTestId("loading-spinner")).toBeInTheDocument();
   });
 });

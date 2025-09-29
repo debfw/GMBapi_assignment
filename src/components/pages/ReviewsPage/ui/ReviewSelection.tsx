@@ -2,10 +2,10 @@ import React, { useMemo } from "react";
 import { Card, Badge, Button } from "react-bootstrap";
 import { CheckCircle } from "lucide-react";
 import { formatRelativeTime } from "@/utils/formatting";
-import type { Review } from "@/services/types";
+import type { ReviewDomain } from "@/services/domain/types";
 
 interface ReviewSelectionProps {
-  reviews: Review[];
+  reviews: ReviewDomain[];
   selectedReviews: Set<string>;
   onSelectAll: () => void;
   onSelectReview: (reviewId: string) => void;

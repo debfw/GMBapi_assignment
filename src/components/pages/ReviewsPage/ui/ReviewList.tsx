@@ -4,15 +4,15 @@ import { ReviewCard } from "./ReviewCard";
 import { ReviewPagination } from "@/components/common";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useStableCallback } from "@/utils/memoization";
-import type { Review, Pagination as PaginationType } from "@/services/types";
+import type { ReviewDomain, PaginationDomain } from "@/services/domain/types";
 import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
 
 interface ReviewListProps {
-  reviews: Review[];
-  pagination?: PaginationType;
+  reviews: ReviewDomain[];
+  pagination?: PaginationDomain;
   loading?: boolean;
   error?: string;
-  onReply: (review: Review) => void;
+  onReply: (review: ReviewDomain) => void;
   onPageChange?: (page: number) => void;
   className?: string;
   filterState?: FilterState;

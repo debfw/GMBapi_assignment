@@ -2,10 +2,10 @@ import React from "react";
 import { Badge, Image } from "react-bootstrap";
 import { Star, Clock, User } from "lucide-react";
 import { formatRelativeTime } from "@/utils/formatting";
-import type { Review } from "@/services/types";
+import type { ReviewDomain } from "@/services/domain/types";
 
 interface ReviewHeaderProps {
-  review: Review;
+  review: ReviewDomain;
 }
 
 export const ReviewHeader: React.FC<ReviewHeaderProps> = React.memo(

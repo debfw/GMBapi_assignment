@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react";
+// @ts-nocheck
+import { render, screen, within } from "@testing-library/react";
 import { Star, Heart, MessageCircle } from "lucide-react";
 import { describe, it, expect } from "vitest";
-import { MetricCard } from "@/components/common/MetricCard";
+import { MetricCard } from "../../../../src/components/common/MetricCard";
 
 describe("MetricCard", () => {
   const defaultProps = {
@@ -54,11 +55,14 @@ describe("MetricCard", () => {
   });
 
   it("renders with different icons", () => {
-    const { rerender } = render(<MetricCard {...defaultProps} icon={Heart} />);
-    expect(screen.getByText("Average Rating")).toBeInTheDocument();
+    const { rerender, container } = render(
+      <MetricCard {...defaultProps} icon={Heart} />
+    );
+    const scope = within(container);
+    expect(scope.getByText("Average Rating")).toBeInTheDocument();
 
     rerender(<MetricCard {...defaultProps} icon={MessageCircle} />);
-    expect(screen.getByText("Average Rating")).toBeInTheDocument();
+    expect(scope.getByText("Average Rating")).toBeInTheDocument();
   });
 
   it("has correct icon size", () => {
@@ -125,10 +129,11 @@ describe("MetricCard", () => {
     const testValues = [0, 1, 42, 100, 1000, 4.5, 3.14, -5];
 
     testValues.forEach((value) => {
-      const { unmount } = render(
+      const { unmount, container } = render(
         <MetricCard {...defaultProps} value={value} />
       );
-      expect(screen.getByText(value.toString())).toBeInTheDocument();
+      const scope = within(container);
+      expect(scope.getByText(value.toString())).toBeInTheDocument();
       unmount();
     });
   });

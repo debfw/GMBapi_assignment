@@ -1,4 +1,5 @@
-import "@testing-library/jest-dom";
+import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
 import { vi, beforeAll, afterEach, afterAll } from "vitest";
 import { server } from "./mocks/server";
 
@@ -44,5 +45,8 @@ global.localStorage = localStorageMock as any;
 
 // Setup MSW server
 beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
+afterEach(() => {
+  server.resetHandlers();
+  cleanup();
+});
 afterAll(() => server.close());

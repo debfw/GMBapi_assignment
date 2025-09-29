@@ -2,11 +2,16 @@ import React, { useState, useCallback, useEffect } from "react";
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
 import { SingleReviewReplyModal } from "./ui/SingleReviewReplyModal";
 import { BulkReplyModal } from "./ui/BulkReplyModal";
-import { ReviewsHeader, ReviewsFilters } from "@/components/common";
 import { ReviewsContent } from "./ui/ReviewsContent";
-import { useReviews, useReviewsFilters } from "@/hooks";
-import type { Review } from "@/services/types";
+import type { ReviewDomain } from "@/services/domain/types";
+import type { ReviewFiltersDomain } from "@/services/domain/types";
 import { useModalContext } from "@/stores/ModalContext";
+import { ReviewsHeader } from "./ui/ReviewsHeader";
+import { ReviewsFilters } from "./ui/ReviewsFilters";
+import { useReviewsFilters } from "./hooks/useReviewsFilters";
+import { useReviews } from "./hooks/useReviewService";
+import type { Review } from "@/services";
+// Removed unused API Review type; using domain types throughout
 
 export const ReviewsPage: React.FC = () => {
   const [selectedReview, setSelectedReview] = useState<{
@@ -36,11 +41,22 @@ export const ReviewsPage: React.FC = () => {
 
   const { mutate, data, error, isPending } = useReviews();
 
-  useEffect(() => {
-    mutate({ data: filters });
-  }, [filters, mutate]);
+  const toDomainFilters = useCallback(
+    (f: any): ReviewFiltersDomain => ({
+      page: f.page ?? 1,
+      per_page: f.per_page ?? 20,
+      is_deleted: f.is_deleted ?? false,
+      star_rating: f.star_rating,
+      has_reply: f.has_reply,
+    }),
+    []
+  );
 
-  const handleReplyClick = useCallback((review: Review) => {
+  useEffect(() => {
+    mutate(toDomainFilters(filters));
+  }, [filters, mutate, toDomainFilters]);
+
+  const handleReplyClick = useCallback((review: ReviewDomain) => {
     setSelectedReview({
       id: review.id,
       text: review.comment,
@@ -54,25 +70,17 @@ export const ReviewsPage: React.FC = () => {
     setSelectedReview(null);
   }, [closeReply]);
 
-  const handleBulkReply = useCallback(() => {
-    openBulk();
-  }, [openBulk]);
-
-  const handleCloseBulkReplyModal = useCallback(() => {
-    closeBulk();
-  }, [closeBulk]);
-
   const handleRefreshReviews = useCallback(() => {
-    mutate({ data: filters });
-  }, [mutate, filters]);
+    mutate(toDomainFilters(filters));
+  }, [mutate, filters, toDomainFilters]);
 
   const handleReplySuccess = useCallback(() => {
-    mutate({ data: filters });
-  }, [mutate, filters]);
+    mutate(toDomainFilters(filters));
+  }, [mutate, filters, toDomainFilters]);
 
   const handleBulkReplySuccess = useCallback(() => {
-    mutate({ data: filters });
-  }, [mutate, filters]);
+    mutate(toDomainFilters(filters));
+  }, [mutate, filters, toDomainFilters]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -84,7 +92,7 @@ export const ReviewsPage: React.FC = () => {
   const reviews = data?.reviews || [];
 
   const filteredReviews = searchTerm.trim()
-    ? reviews.filter((review: Review) => {
+    ? reviews.filter((review: ReviewDomain) => {
         const searchLower = searchTerm.toLowerCase();
         return (
           review.comment?.toLowerCase().includes(searchLower) ||
@@ -143,7 +151,7 @@ export const ReviewsPage: React.FC = () => {
               onStarRatingChange={handleStarRatingChange}
               onClearFilters={handleClearFilters}
               onReplyStatusChange={handleReplyStatusChange}
-              onBulkReply={handleBulkReply}
+              onBulkReply={openBulk}
               onRefreshReviews={handleRefreshReviews}
               searchTerm={searchTerm}
               onSearchChange={setSearchTerm}
@@ -180,7 +188,7 @@ export const ReviewsPage: React.FC = () => {
       <BulkReplyModal
         show={isBulkOpen}
         reviews={reviews}
-        onClose={handleCloseBulkReplyModal}
+        onClose={closeBulk}
         onSuccess={handleBulkReplySuccess}
       />
     </ResponsiveLayout>

@@ -1,16 +1,16 @@
 import React from "react";
-import { ReviewList } from "@/components/common";
 import { COLORS } from "@/styles/design-system";
-import type { Review, Pagination as PaginationType } from "@/services/types";
+import type { ReviewDomain, PaginationDomain } from "@/services/domain/types";
 import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
+import { ReviewList } from "./ReviewList";
 
 interface ReviewsContentProps {
-  reviews: Review[];
-  pagination: PaginationType;
+  reviews: ReviewDomain[];
+  pagination: PaginationDomain;
   loading: boolean;
   error?: string;
   filterState: FilterState;
-  onReply: (review: Review) => void;
+  onReply: (review: ReviewDomain) => void;
   onPageChange: (page: number) => void;
   isSearching?: boolean;
 }

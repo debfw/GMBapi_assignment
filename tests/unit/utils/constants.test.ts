@@ -4,7 +4,8 @@ import {
   REVIEW_STATUS,
   REVIEW_RATINGS,
   PAGINATION,
-} from "@/utils/constants";
+} from "../../../src/utils/constants";
+import { describe, it, expect } from "vitest";
 
 describe("constants", () => {
   describe("REPLY_LIMITS", () => {

@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "react-bootstrap";
 import { Send, X, Users } from "lucide-react";
 import { ReviewSelection } from "./ReviewSelection";
-import type { Review } from "@/services/types";
+import type { ReviewDomain } from "@/services/domain/types";
 import { ReplyForm } from "@/components/common/ReplyForm";
 import { ReplyModalLayout } from "@/components/common/ReplyModalLayout";
 
 interface BulkReplyModalProps {
   show: boolean;
-  reviews: Review[];
+  reviews: ReviewDomain[];
   onClose: () => void;
   onSuccess?: () => void;
 }

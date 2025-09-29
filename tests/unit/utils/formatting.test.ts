@@ -4,7 +4,8 @@ import {
   formatRating,
   truncateText,
   formatReviewCount,
-} from "@/utils/formatting";
+} from "../../../src/utils/formatting";
+import { describe, it, expect } from "vitest";
 
 describe("formatting utilities", () => {
   describe("formatDate", () => {

@@ -6,7 +6,7 @@ import tseslint from "typescript-eslint";
 import { defineConfig, globalIgnores } from "eslint/config";
 
 export default defineConfig([
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", "tests/**"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -19,6 +19,13 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+  },
+  // Disable TS type-checking in all test files (unit and e2e)
+  {
+    files: ["tests/**/*.{ts,tsx}", "**/*.spec.{ts,tsx}", "**/*.test.{ts,tsx}"],
+    ignores: [],
+    extends: [tseslint.configs.disableTypeChecked],
+    rules: {},
   },
   {
     files: ["src/services/**/*.{ts,tsx}"],

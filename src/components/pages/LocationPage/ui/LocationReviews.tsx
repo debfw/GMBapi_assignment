@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { ReviewList, ReviewsFilters } from "@/components/common";
 import type { ReviewListResponse } from "@/services/types/ReviewListResponse";
 import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
-import type { Review } from "@/services/types";
+import type { ReviewDomain, PaginationDomain } from "@/services/domain/types";
 import { useGetLocationReviews } from "@/services";
+import { ReviewsFilters } from "../../ReviewsPage/ui/ReviewsFilters";
+import { ReviewList } from "../../ReviewsPage/ui/ReviewList";
 
 interface LocationReviewsProps {
   locationId?: string;
@@ -50,14 +51,44 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
     getLocationReviews({ data: newFilters });
   };
 
-  const handleReply = (review: Review) => {
+  const handleReply = (review: ReviewDomain) => {
     // Handle reply functionality for location reviews
     console.log("Reply to review:", review.id);
   };
 
   const typedData = data as ReviewListResponse | null;
-  const reviews = typedData?.reviews || [];
-  const pagination = typedData?.pagination;
+  const reviewsApi = typedData?.reviews || [];
+  const paginationApi = typedData?.pagination;
+
+  const reviews: ReviewDomain[] = reviewsApi.map((r) => ({
+    id: r.id,
+    customerName: r.customerName,
+    customerPhoto: r.customerPhoto,
+    comment: r.comment,
+    rating: r.rating,
+    date: r.date,
+    status: r.status as any,
+    locationName: r.locationName,
+    helpfulVotes: r.helpfulVotes,
+    businessReply: r.businessReply
+      ? {
+          text: r.businessReply.text,
+          date: r.businessReply.date,
+          isPublic: r.businessReply.isPublic,
+        }
+      : undefined,
+  }));
+
+  const pagination: PaginationDomain | undefined = paginationApi
+    ? {
+        page: paginationApi.page,
+        limit: paginationApi.limit,
+        total: paginationApi.total,
+        totalPages: paginationApi.totalPages,
+        hasNext: paginationApi.hasNext ?? false,
+        hasPrev: paginationApi.hasPrev ?? false,
+      }
+    : undefined;
 
   const filterState: FilterState = {
     searchTerm: "",

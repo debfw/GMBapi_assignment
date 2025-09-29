@@ -2,11 +2,11 @@ import React from "react";
 import { Button } from "react-bootstrap";
 import { MessageCircle } from "lucide-react";
 import { formatRelativeTime } from "@/utils/formatting";
-import type { Review } from "@/services/types";
+import type { ReviewDomain } from "@/services/domain/types";
 
 interface ReviewReplyProps {
-  review: Review;
-  onReply: (review: Review) => void;
+  review: ReviewDomain;
+  onReply: (review: ReviewDomain) => void;
 }
 
 export const ReviewReplyDisplay: React.FC<ReviewReplyProps> = React.memo(
