@@ -8,13 +8,12 @@ import {
   Star,
   MapPin,
   Edit3,
-  CheckCircle,
-  Circle,
-  XCircle,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
 import { useLocationsData } from "./hooks/useLocations";
+import { getHealthColor } from "@/utils/health";
+import { HealthBadge } from "@/components/common/HealthBadge";
 
 export const LocationsPage: React.FC = () => {
   const navigate = useNavigate();
@@ -37,18 +36,6 @@ export const LocationsPage: React.FC = () => {
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  const getHealthColor = (health: number) => {
-    if (health >= 80) return "success";
-    if (health >= 60) return "warning";
-    return "danger";
-  };
-
-  const getHealthIcon = (health: number) => {
-    if (health >= 80) return <CheckCircle size={16} className="text-success" />;
-    if (health >= 60) return <Circle size={16} className="text-warning" />;
-    return <XCircle size={16} className="text-danger" />;
-  };
 
   const filteredLocations = locations.filter(
     (location) =>
@@ -334,7 +321,7 @@ export const LocationsPage: React.FC = () => {
                       <span className="fw-bold fs-4 me-2">
                         {overallHealth}%
                       </span>
-                      {getHealthIcon(overallHealth)}
+                      <HealthBadge health={overallHealth} />
                     </div>
                     <div className="progress" style={{ height: 8 }}>
                       <div

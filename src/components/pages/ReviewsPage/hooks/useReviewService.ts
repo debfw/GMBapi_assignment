@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useState } from "react";
 import { getReviews as getReviewsClient } from "@/services/hooks/useGetReviews";
 import { replyToReview as replyToReviewClient } from "@/services/hooks/useReplyToReview";
 import { transformReviewListResponse } from "@/utils/apiTransformers";
@@ -7,7 +6,6 @@ import type { ReviewListResponseDomain } from "@/services/domain/types";
 import type {
   ReviewFiltersDomain,
   ReviewReplyDomain,
-  FilterState,
 } from "@/services/domain/types";
 
 export const REVIEW_QUERY_KEYS = {

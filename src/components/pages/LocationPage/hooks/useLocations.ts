@@ -1,4 +1,3 @@
-// import { useQuery } from "@tanstack/react-query";
 import { useGetLocations } from "@/services/hooks";
 import type { GetLocationsQueryParams } from "@/services/types";
 

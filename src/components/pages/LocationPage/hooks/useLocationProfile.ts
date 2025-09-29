@@ -1,4 +1,3 @@
-// import { useQuery } from "@tanstack/react-query";
 import { useGetAccountLocationProfile } from "@/services/hooks";
 
 export const useLocationProfile = (locationId: string) => {

@@ -1,9 +1,8 @@
 import React from "react";
+import { getHealthColor } from "@/utils/health";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import {
   CheckCircle,
-  XCircle,
-  AlertCircle,
   Phone,
   Globe,
   MapPin,
@@ -15,6 +14,7 @@ import {
   Camera,
   Settings,
 } from "lucide-react";
+import { HealthBadge } from "@/components/common/HealthBadge";
 import { useGetAccountLocationHygiene } from "@/services";
 
 interface LocationHygieneProps {
@@ -47,18 +47,6 @@ export const LocationHygiene: React.FC<LocationHygieneProps> = ({
   if (!hygiene) {
     return <div className="text-muted small">No hygiene data available</div>;
   }
-
-  const getHealthColor = (health: number) => {
-    if (health >= 80) return "success";
-    if (health >= 60) return "warning";
-    return "danger";
-  };
-
-  const getHealthIcon = (health: number) => {
-    if (health >= 80) return <CheckCircle size={16} className="text-success" />;
-    if (health >= 60) return <AlertCircle size={16} className="text-warning" />;
-    return <XCircle size={16} className="text-danger" />;
-  };
 
   const hygieneItems = [
     { key: "is_verified", label: "Verified", icon: CheckCircle },
@@ -99,12 +87,7 @@ export const LocationHygiene: React.FC<LocationHygieneProps> = ({
       <div className="mb-4">
         <div className="d-flex align-items-center justify-content-between mb-2">
           <h6 className="mb-0">Overall Health</h6>
-          <div className="d-flex align-items-center">
-            <span className="fw-bold me-2">
-              {Math.round(hygiene.payload.health)}%
-            </span>
-            {getHealthIcon(hygiene.payload.health)}
-          </div>
+          <HealthBadge health={hygiene.payload.health} />
         </div>
         <div className="progress" style={{ height: "8px" }}>
           <div

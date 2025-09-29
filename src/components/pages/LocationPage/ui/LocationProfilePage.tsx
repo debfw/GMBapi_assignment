@@ -11,14 +11,14 @@ import {
   Phone,
   Globe,
   Building,
-  CheckCircle,
-  XCircle,
   Clock,
   Image,
   FileText,
   Settings,
 } from "lucide-react";
 import { useLocationProfileData } from "../hooks/useLocationProfile";
+import { getHealthColor } from "@/utils/health";
+import { HealthBadge } from "@/components/common/HealthBadge";
 
 export const LocationProfilePage: React.FC = () => {
   const { locationId } = useParams<{ locationId: string }>();
@@ -73,18 +73,6 @@ export const LocationProfilePage: React.FC = () => {
   }
 
   const { data, attributes, hygiene } = profile;
-
-  const getHealthColor = (health: number) => {
-    if (health >= 80) return "success";
-    if (health >= 60) return "warning";
-    return "danger";
-  };
-
-  const getHealthIcon = (health: number) => {
-    if (health >= 80) return <CheckCircle size={16} className="text-success" />;
-    if (health >= 60) return <XCircle size={16} className="text-warning" />;
-    return <XCircle size={16} className="text-danger" />;
-  };
 
   const formatAttributeName = (name: string) => {
     return name
@@ -320,7 +308,7 @@ export const LocationProfilePage: React.FC = () => {
                           <span className="fw-bold fs-4 me-2">
                             {Math.round(hygiene.health)}%
                           </span>
-                          {getHealthIcon(hygiene.health)}
+                          <HealthBadge health={hygiene.health} />
                         </div>
                         <div className="progress" style={{ height: "8px" }}>
                           <div
@@ -336,12 +324,12 @@ export const LocationProfilePage: React.FC = () => {
                           {
                             label: "Verified",
                             value: hygiene.is_verified,
-                            icon: CheckCircle,
+                            icon: Settings,
                           },
                           {
                             label: "Published",
                             value: hygiene.is_published,
-                            icon: CheckCircle,
+                            icon: Settings,
                           },
                           {
                             label: "Phone",
@@ -436,9 +424,9 @@ export const LocationProfilePage: React.FC = () => {
                               <span className="small">{item.label}</span>
                             </div>
                             {item.value ? (
-                              <CheckCircle size={16} className="text-success" />
+                              <span className="text-success">Yes</span>
                             ) : (
-                              <XCircle size={16} className="text-danger" />
+                              <span className="text-danger">No</span>
                             )}
                           </div>
                         ))}

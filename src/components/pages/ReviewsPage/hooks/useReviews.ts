@@ -1,9 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import {
-  getReviewsMutationOptions,
-  replyToReviewMutationOptions,
-  getReviews,
-} from "@/services/hooks";
+import { getReviewsMutationOptions, getReviews } from "@/services/hooks";
 import type { ReviewFilters } from "@/services/types";
 import { transformReviewListResponse } from "@/utils/apiTransformers";
 
@@ -18,10 +14,4 @@ export const useReviews = () => {
   });
 
   return baseMutation;
-};
-
-export const useReviewReply = () => {
-  return useMutation({
-    ...replyToReviewMutationOptions(),
-  });
 };
