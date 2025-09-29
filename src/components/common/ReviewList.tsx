@@ -16,6 +16,7 @@ interface ReviewListProps {
   onPageChange?: (page: number) => void;
   className?: string;
   filterState?: FilterState;
+  hidePagination?: boolean;
 }
 
 export const ReviewList: React.FC<ReviewListProps> = React.memo(
@@ -28,6 +29,7 @@ export const ReviewList: React.FC<ReviewListProps> = React.memo(
     onPageChange,
     className = "",
     filterState,
+    hidePagination = false,
   }) => {
     const handleReply = useStableCallback(onReply);
     if (loading) {
@@ -95,7 +97,7 @@ export const ReviewList: React.FC<ReviewListProps> = React.memo(
               ))}
             </div>
 
-            {pagination && onPageChange && (
+            {pagination && onPageChange && !hidePagination && (
               <ReviewPagination
                 pagination={pagination}
                 onPageChange={onPageChange}

@@ -17,13 +17,13 @@ export const ReviewCard: React.FC<ReviewCardProps> = React.memo(
       <Card className={`mb-3 ${className}`}>
         <Card.Body className="review-card-content">
           <Row>
-            <Col xs={2} className="review-card-details-section">
+            <Col xs={12} md={2} className="review-card-details-section">
               <ReviewHeader review={review} />
             </Col>
-            <Col xs={6} className="review-card-review-section">
+            <Col xs={12} md={6} className="review-card-review-section">
               <ReviewContent review={review} />
             </Col>
-            <Col xs={4} className="review-card-reply-section">
+            <Col xs={12} md={4} className="review-card-reply-section">
               <ReviewReplyDisplay review={review} onReply={onReply} />
             </Col>
           </Row>

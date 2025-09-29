@@ -12,6 +12,7 @@ interface ReviewsContentProps {
   filterState: FilterState;
   onReply: (review: Review) => void;
   onPageChange: (page: number) => void;
+  isSearching?: boolean;
 }
 
 export const ReviewsContent: React.FC<ReviewsContentProps> = React.memo(
@@ -23,6 +24,7 @@ export const ReviewsContent: React.FC<ReviewsContentProps> = React.memo(
     filterState,
     onReply,
     onPageChange,
+    isSearching = false,
   }) => {
     const renderFilterStatus = () => {
       const hasApiFilters =
@@ -67,16 +69,20 @@ export const ReviewsContent: React.FC<ReviewsContentProps> = React.memo(
     return (
       <div className="reviews-section">
         <div
-          className="rounded-3 shadow-sm border-0 p-4"
+          className="rounded-3 border-0 p-3 p-md-4"
           style={{
             backgroundColor: COLORS.white,
             borderRadius: "12px",
-            border: `1px solid ${COLORS.borderLight}`,
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            border: "none",
+            boxShadow: "none",
           }}
         >
-          <div className="d-flex align-items-center justify-content-between mb-4">
-            <div className="text-muted small" data-testid="filter-status">
+          <div className="d-flex align-items-center justify-content-between mb-4 reviews-toolbar px-0">
+            <div
+              className="text-muted small filter-status"
+              data-testid="filter-status"
+              style={{ marginLeft: 0 }}
+            >
               {renderFilterStatus()}
             </div>
           </div>
@@ -89,6 +95,7 @@ export const ReviewsContent: React.FC<ReviewsContentProps> = React.memo(
             onReply={onReply}
             onPageChange={onPageChange}
             filterState={filterState}
+            hidePagination={isSearching}
           />
         </div>
       </div>

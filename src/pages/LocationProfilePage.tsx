@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
 import { useLocationProfileData } from "@/hooks";
 import {
   LocationHygiene,
@@ -31,8 +31,7 @@ export const LocationProfilePage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="d-flex h-100">
-        <Sidebar activeSection="locations" />
+      <ResponsiveLayout activeSection="locations">
         <div className="main-content d-flex flex-column bg-light">
           <div className="d-flex justify-content-center align-items-center h-100">
             <div className="spinner-border text-primary" role="status">
@@ -40,14 +39,13 @@ export const LocationProfilePage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </ResponsiveLayout>
     );
   }
 
   if (isError || !profile) {
     return (
-      <div className="d-flex h-100">
-        <Sidebar activeSection="locations" />
+      <ResponsiveLayout activeSection="locations">
         <div className="main-content d-flex flex-column bg-light">
           <div className="d-flex justify-content-center align-items-center h-100">
             <div className="text-center">
@@ -66,7 +64,7 @@ export const LocationProfilePage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </ResponsiveLayout>
     );
   }
 
@@ -92,9 +90,7 @@ export const LocationProfilePage: React.FC = () => {
   };
 
   return (
-    <div className="d-flex h-100">
-      <Sidebar activeSection="locations" />
-
+    <ResponsiveLayout activeSection="locations">
       <div className="main-content d-flex flex-column bg-light">
         {/* Header */}
         <div className="bg-white border-bottom p-4">
@@ -453,6 +449,6 @@ export const LocationProfilePage: React.FC = () => {
           )}
         </div>
       </div>
-    </div>
+    </ResponsiveLayout>
   );
 };

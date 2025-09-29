@@ -20,7 +20,7 @@ export const MetricCard: React.FC<MetricCardProps> = ({
     <div className={`d-flex align-items-center gap-3 ${className}`}>
       <Icon
         size={20}
-        className="metric-card-icon"
+        className="metric-card-icon d-none d-md-inline"
         style={
           iconColor
             ? ({ "--metric-card-icon-color": iconColor } as React.CSSProperties)
@@ -28,8 +28,13 @@ export const MetricCard: React.FC<MetricCardProps> = ({
         }
       />
       <div>
-        <div className="small text-muted metric-card-label">{label}</div>
-        <div className="fw-bold metric-card-value">{value ?? ""}</div>
+        <div className=" text-muted metric-card-label">{label}</div>
+        <div
+          className="fw-bold metric-card-value"
+          style={{ fontSize: "12px", bottom: "0px" }}
+        >
+          {value ?? ""}
+        </div>
       </div>
     </div>
   );

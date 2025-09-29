@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
+import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
 import { SingleReviewReplyModal } from "./SingleReviewReplyModal";
 import { BulkReplyModal } from "./BulkReplyModal";
 import { ReviewsHeader, ReviewsFilters } from "@/components/common";
@@ -16,6 +16,7 @@ export const ReviewsPage: React.FC = () => {
 
   const [showReplyModal, setShowReplyModal] = useState(false);
   const [showBulkReplyModal, setShowBulkReplyModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const {
     filters,
@@ -74,25 +75,41 @@ export const ReviewsPage: React.FC = () => {
   );
 
   const reviews = data?.reviews || [];
-  const pagination = data?.pagination || {
-    page: 1,
-    limit: 20,
-    total: 0,
-    totalPages: 0,
-    hasNext: false,
-    hasPrev: false,
-  };
+
+  // Filter reviews based on search term
+  const filteredReviews = searchTerm.trim()
+    ? reviews.filter((review) => {
+        const searchLower = searchTerm.toLowerCase();
+        return (
+          review.comment?.toLowerCase().includes(searchLower) ||
+          review.customerName?.toLowerCase().includes(searchLower) ||
+          review.businessReply?.text?.toLowerCase().includes(searchLower)
+        );
+      })
+    : reviews;
+
+  // Use original pagination when not searching, otherwise create custom pagination for filtered results
+  const pagination = searchTerm.trim()
+    ? {
+        page: 1,
+        limit: filteredReviews.length,
+        total: filteredReviews.length,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
+      }
+    : data?.pagination || {
+        page: 1,
+        limit: 20,
+        total: 0,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+      };
 
   return (
-    <div
-      style={{ display: "flex", minHeight: "100vh" }}
-      data-testid="reviews-page"
-    >
-      {/* Sidebar */}
-      <Sidebar activeSection="reviews" />
-
-      {/* Main Content Area */}
-      <div className="page-content-container">
+    <ResponsiveLayout activeSection="reviews">
+      <div className="page-content-container" data-testid="reviews-page">
         <div className="main-content-wrapper">
           {/* Header Section */}
           <div className="content-section">
@@ -121,15 +138,15 @@ export const ReviewsPage: React.FC = () => {
               onClearFilters={handleClearFilters}
               onReplyStatusChange={handleReplyStatusChange}
               onBulkReply={handleBulkReply}
-              onExportReviews={() => {}}
-              onImportReviews={() => {}}
               onRefreshReviews={handleRefreshReviews}
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
             />
           </div>
 
           {/* Reviews Content */}
           <ReviewsContent
-            reviews={reviews}
+            reviews={filteredReviews}
             pagination={pagination}
             loading={isPending}
             error={
@@ -140,6 +157,7 @@ export const ReviewsPage: React.FC = () => {
             filterState={filterState}
             onReply={handleReplyClick}
             onPageChange={handlePageChange}
+            isSearching={!!searchTerm.trim()}
           />
         </div>
       </div>
@@ -160,6 +178,6 @@ export const ReviewsPage: React.FC = () => {
         onClose={handleCloseBulkReplyModal}
         onSuccess={handleBulkReplySuccess}
       />
-    </div>
+    </ResponsiveLayout>
   );
 };

@@ -1,0 +1,469 @@
+/* Mobile-specific styles for iPhone 14 Pro (390x844) and similar devices */
+
+/* Mobile Header Rows */
+.reviews-header-mobile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+
+.mobile-header-row-1 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-header-row-2 {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-header-row-3 {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+/* Mobile Filter Rows */
+.mobile-filters-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mobile-filter-row-1 {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-filter-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.mobile-filter-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* Prevent horizontal scroll */
+@media (max-width: 1609px) {
+  body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+  }
+
+  .App {
+    overflow-x: hidden !important;
+  }
+
+  /* Main content container adjustments */
+  .page-content-container {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .main-content-wrapper {
+    width: 100% !important;
+    max-width: 100vw !important;
+    padding: 12px !important;
+  }
+
+  .content-section {
+    padding: 12px !important;
+    width: 100% !important;
+  }
+
+  .filters-section {
+    padding: 12px !important;
+    width: 100% !important;
+  }
+
+  /* Reviews Header Mobile Layout */
+  .reviews-header {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 !important;
+  }
+
+  .reviews-header h1 {
+    font-size: 1.5rem !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Google Reviews and Rating - Two row layout */
+  .reviews-header-top {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .google-reviews-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .average-rating-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px !important;
+  }
+
+  .average-rating-group .rating-number {
+    font-size: 16px !important;
+    font-weight: 600;
+  }
+
+  .average-rating-group .star-icons {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+  }
+
+  .average-rating-group .review-count {
+    color: #6c757d;
+    font-size: 12px;
+  }
+
+  /* Quick Filters - Vertical Layout */
+  .quick-filters-container,
+  .filters-container {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .quick-filter-button,
+  .btn-outline-primary,
+  .btn-outline-secondary {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
+  }
+
+  .bulk-actions-row {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .bulk-actions-row .btn-group {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .bulk-actions-row button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Review Cards - Prevent overflow */
+  .review-card-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 12px !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  .review-card {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+
+  .review-content {
+    width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+  }
+
+  .review-text {
+    width: 100% !important;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+
+  .review-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .review-customer-name {
+    font-size: 14px !important;
+    font-weight: 600;
+  }
+
+  .review-date {
+    font-size: 12px !important;
+    color: #6c757d;
+  }
+
+  .review-rating {
+    display: flex;
+    gap: 2px;
+  }
+
+  /* Pagination Mobile */
+  .pagination {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    font-size: 14px !important;
+  }
+
+  .pagination .page-link {
+    padding: 6px 10px !important;
+    font-size: 14px !important;
+  }
+
+  /* Metric Cards */
+  .review-metrics-section {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+    width: 100% !important;
+  }
+
+  .metric-card {
+    width: 100% !important;
+    padding: 12px !important;
+  }
+
+  .metric-card h3 {
+    font-size: 14px !important;
+  }
+
+  .metric-card .metric-value {
+    font-size: 20px !important;
+  }
+
+  /* Dropdown and Select elements */
+  .form-select,
+  .form-control {
+    font-size: 14px !important;
+    padding: 8px 12px !important;
+  }
+
+  /* Modal adjustments for mobile */
+  .modal-dialog {
+    margin: 12px !important;
+    max-width: calc(100vw - 24px) !important;
+  }
+
+  .modal-content {
+    border-radius: 12px !important;
+  }
+
+  .modal-header {
+    padding: 16px !important;
+  }
+
+  .modal-body {
+    padding: 16px !important;
+  }
+
+  .modal-footer {
+    padding: 16px !important;
+  }
+
+  /* Table responsive */
+  .table-responsive {
+    width: 100% !important;
+    overflow-x: auto !important;
+  }
+
+  table {
+    font-size: 13px !important;
+  }
+
+  /* Alert boxes */
+  .alert {
+    font-size: 13px !important;
+    padding: 10px !important;
+  }
+
+  /* Loading spinner */
+  .spinner-border {
+    width: 1.5rem !important;
+    height: 1.5rem !important;
+  }
+
+  /* Badge adjustments */
+  .badge {
+    font-size: 11px !important;
+    padding: 4px 8px !important;
+  }
+
+  /* Remove any fixed widths */
+  [style*="width: 280px"] {
+    width: 100% !important;
+  }
+
+  /* Ensure all containers don't exceed viewport */
+  .container,
+  .container-fluid,
+  .row {
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .col,
+  [class*="col-"] {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+}
+
+/* Extra small devices (phones, less than 480px) */
+@media (max-width: 480px) {
+  .reviews-header h1 {
+    font-size: 1.25rem !important;
+  }
+
+  .quick-filter-button,
+  .btn {
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+  }
+
+  .review-card-container {
+    padding: 10px !important;
+  }
+
+  .metric-card {
+    padding: 10px !important;
+  }
+
+  .metric-card h3 {
+    font-size: 13px !important;
+  }
+
+  .metric-card .metric-value {
+    font-size: 18px !important;
+  }
+}
+
+/* Mobile Review Cards */
+.review-card-mobile {
+  border-radius: 12px !important;
+  border: 1px solid #e0e0e0 !important;
+  margin-bottom: 12px !important;
+}
+
+.review-mobile-header {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.review-mobile-content {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.review-mobile-reply {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+/* Mobile Review Elements */
+@media (max-width: 768px) {
+  .review-card-mobile .badge {
+    font-size: 11px !important;
+    padding: 3px 6px !important;
+  }
+
+  .review-mobile-content p {
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+
+  .review-mobile-reply button {
+    width: 100%;
+    justify-content: center;
+    margin-bottom: 8px;
+  }
+
+  /* Fix review text overflow */
+  .review-text,
+  .review-comment {
+    max-width: 100%;
+    overflow-wrap: break-word !important;
+    word-wrap: break-word !important;
+    word-break: break-word !important;
+    white-space: normal !important;
+  }
+
+  /* Reply section adjustments */
+  .reply-content {
+    background-color: #f8f9fa;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 8px;
+    font-size: 13px;
+  }
+
+  /* Pagination mobile styles */
+  .pagination {
+    font-size: 14px !important;
+  }
+
+  .page-link {
+    padding: 8px 12px !important;
+  }
+}
+
+/* iPhone 14 Pro specific (390x844) */
+@media (max-width: 390px) {
+  .main-content-wrapper {
+    padding: 10px !important;
+  }
+
+  .content-section,
+  .filters-section {
+    padding: 10px !important;
+  }
+
+  /* Ensure no element is wider than viewport */
+  * {
+    max-width: 100vw !important;
+  }
+
+  /* Fix any Bootstrap containers */
+  .container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  /* Review cards on small screens */
+  .review-card-mobile {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  .review-card-mobile .card-body {
+    padding: 12px !important;
+  }
+}

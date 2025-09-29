@@ -146,7 +146,7 @@ export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
       </Modal.Header>
 
       <Modal.Body className="px-4 pb-4">
-        <div className="mb-5">
+        <div className="mb-3">
           <h6 className="text-muted mb-3 fw-medium">
             Original Review by {customerName}:
           </h6>

@@ -1,12 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
-import {
-  Users,
-  List,
-  Cloud,
-  RotateCcw,
-  RotateCcw as ClearIcon,
-} from "lucide-react";
+import { Search } from "lucide-react";
 import type { FilterState } from "@/hooks/useReviewsFilters";
 
 interface ReviewsFiltersProps {
@@ -15,9 +9,9 @@ interface ReviewsFiltersProps {
   onClearFilters: () => void;
   onReplyStatusChange: (value: string) => void;
   onBulkReply: () => void;
-  onExportReviews: () => void;
-  onImportReviews: () => void;
   onRefreshReviews: () => void;
+  searchTerm?: string;
+  onSearchChange?: (value: string) => void;
   className?: string;
 }
 
@@ -27,108 +21,203 @@ export const ReviewsFilters: React.FC<ReviewsFiltersProps> = ({
   onClearFilters,
   onReplyStatusChange,
   onBulkReply,
-  onExportReviews,
-  onImportReviews,
   onRefreshReviews,
+  searchTerm = "",
+  onSearchChange,
   className = "",
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1610);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  // Mobile Layout
+  if (isMobile) {
+    return (
+      <div
+        className={`rounded-3 shadow-sm border-0 reviews-filters-container ${className}`}
+      >
+        <div className="mobile-filters-layout">
+          {/* Search bar row */}
+          <div className="position-relative mb-3">
+            <Search
+              size={16}
+              className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"
+            />
+            <input
+              type="text"
+              className="form-control ps-5"
+              placeholder="Search reviews..."
+              value={searchTerm}
+              onChange={(e) => onSearchChange?.(e.target.value)}
+            />
+          </div>
+
+          {/* Row 1: Quick filters label as collapsible header */}
+          <button
+            type="button"
+            className="w-100 d-flex align-items-center justify-content-between btn btn-link text-decoration-none p-0 mb-2"
+            onClick={() => setCollapsed((p) => !p)}
+            aria-expanded={!collapsed}
+            aria-controls="mobile-quick-filters"
+          >
+            <span className="text-muted small">Quick filters:</span>
+            <span className={`ms-2 ${collapsed ? "rotate-0" : "rotate-180"}`}>
+              ▾
+            </span>
+          </button>
+
+          {!collapsed && (
+            <div id="mobile-quick-filters">
+              {/* Row 2: Stars, Reviews, Bulk Reply */}
+              <div className="mobile-filter-row-2">
+                <select
+                  className="form-select filters-control"
+                  value={filterState.selectedStarRating}
+                  onChange={(e) => onStarRatingChange(e.target.value)}
+                >
+                  <option value="">Stars</option>
+                  <option value="5">5 Stars</option>
+                  <option value="4">4 Stars</option>
+                  <option value="3">3 Stars</option>
+                  <option value="2">2 Stars</option>
+                  <option value="1">1 Star</option>
+                </select>
+
+                <select
+                  className="form-select filters-control"
+                  value={filterState.replyStatus}
+                  onChange={(e) => onReplyStatusChange(e.target.value)}
+                >
+                  <option value="">Reviews</option>
+                  <option value="replied">Replied</option>
+                  <option value="unreplied">Unreplied</option>
+                </select>
+
+                <Button
+                  onClick={onBulkReply}
+                  variant="primary"
+                  size="sm"
+                  className="d-flex align-items-center justify-content-center filters-btn"
+                  style={{ backgroundColor: "#ff6b35", borderColor: "#ff6b35" }}
+                >
+                  Bulk Reply
+                </Button>
+              </div>
+
+              {/* Row 3: Clear All and Refresh */}
+              <div className="mobile-filter-row-3">
+                <Button
+                  onClick={onClearFilters}
+                  variant="outline-secondary"
+                  size="sm"
+                  className="d-flex align-items-center justify-content-center filters-btn"
+                >
+                  Clear All
+                </Button>
+
+                <Button
+                  onClick={onRefreshReviews}
+                  variant="outline-secondary"
+                  size="sm"
+                  className="d-flex align-items-center justify-content-center filters-btn"
+                >
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop Layout
   return (
     <div
       className={`rounded-3 shadow-sm border-0 p-3 reviews-filters-container ${className}`}
     >
-      {/* Single Row with Quick Filters and Action Buttons */}
-      <div className="d-flex align-items-center justify-content-between gap-3 flex-wrap">
-        {/* Left Side - Quick Filters */}
-        <div className="d-flex align-items-center gap-3 flex-wrap">
-          <span className="text-muted small reviews-filters-quick-label">
-            Quick filters:
-          </span>
-
-          {/* Star Rating Filter */}
-          <div className="reviews-filters-star-select">
-            <select
-              className="form-select reviews-filters-star-select-field"
-              value={filterState.selectedStarRating}
-              onChange={(e) => onStarRatingChange(e.target.value)}
-            >
-              <option value="">All Stars</option>
-              <option value="5">5 Stars</option>
-              <option value="4">4 Stars</option>
-              <option value="3">3 Stars</option>
-              <option value="2">2 Stars</option>
-              <option value="1">1 Star</option>
-            </select>
-          </div>
-
-          {/* Reply Status Dropdown */}
-          <div className="reviews-filters-star-select">
-            <select
-              className="form-select reviews-filters-star-select-field"
-              value={filterState.replyStatus}
-              onChange={(e) => onReplyStatusChange(e.target.value)}
-            >
-              <option value="">All Reviews</option>
-              <option value="replied">Replied</option>
-              <option value="unreplied">Unreplied</option>
-            </select>
-          </div>
-
-          {/* Clear All Filters Button */}
-          <Button
-            onClick={onClearFilters}
-            variant="outline"
-            size="sm"
-            className="d-flex align-items-center"
-          >
-            <ClearIcon size={16} className="me-2" />
-            Clear All
-          </Button>
+      {/* Search bar for desktop */}
+      <div className="d-flex gap-3 mb-3">
+        <div
+          className="position-relative flex-grow-1"
+          style={{ maxWidth: "400px" }}
+        >
+          <Search
+            size={16}
+            className="position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"
+          />
+          <input
+            type="text"
+            className="form-control ps-5"
+            placeholder="Search reviews..."
+            value={searchTerm}
+            onChange={(e) => onSearchChange?.(e.target.value)}
+          />
         </div>
+      </div>
 
-        {/* Right Side - Action Buttons */}
-        <div className="d-flex align-items-center gap-2">
-          {/* Bulk Reply Button */}
+      <div className="filters-grid-desktop">
+        <span className="text-muted small reviews-filters-quick-label">
+          Quick filters:
+        </span>
+
+        <select
+          className="form-select reviews-filters-star-select-field filters-control"
+          value={filterState.selectedStarRating}
+          onChange={(e) => onStarRatingChange(e.target.value)}
+        >
+          <option value="">Stars</option>
+          <option value="5">5 Stars</option>
+          <option value="4">4 Stars</option>
+          <option value="3">3 Stars</option>
+          <option value="2">2 Stars</option>
+          <option value="1">1 Star</option>
+        </select>
+
+        <select
+          className="form-select reviews-filters-star-select-field filters-control"
+          value={filterState.replyStatus}
+          onChange={(e) => onReplyStatusChange(e.target.value)}
+        >
+          <option value="">Reviews</option>
+          <option value="replied">Replied</option>
+          <option value="unreplied">Unreplied</option>
+        </select>
+
+        <div className="filters-actions">
           <Button
             onClick={onBulkReply}
             variant="primary"
             size="sm"
-            className="d-flex align-items-center"
+            className="filters-btn"
             style={{ backgroundColor: "#ff6b35", borderColor: "#ff6b35" }}
           >
-            <Users size={16} className="me-2" />
             Bulk Reply
-          </Button>
-
-          {/* Additional Action Buttons */}
-          <Button
-            onClick={onExportReviews}
-            variant="outline"
-            size="sm"
-            className="d-flex align-items-center justify-content-center"
-            style={{ width: "40px", height: "40px" }}
-            title="Export Reviews"
-          >
-            <List size={16} />
-          </Button>
-          <Button
-            onClick={onImportReviews}
-            variant="outline"
-            size="sm"
-            className="d-flex align-items-center justify-content-center"
-            style={{ width: "40px", height: "40px" }}
-            title="Import Reviews"
-          >
-            <Cloud size={16} />
           </Button>
           <Button
             onClick={onRefreshReviews}
             variant="outline"
             size="sm"
-            className="d-flex align-items-center justify-content-center"
-            style={{ width: "40px", height: "40px" }}
-            title="Refresh Reviews"
+            className="filters-btn"
           >
-            <RotateCcw size={16} />
+            Refresh
+          </Button>
+          <Button
+            onClick={onClearFilters}
+            variant="outline"
+            size="sm"
+            className="filters-btn"
+          >
+            Clear All
           </Button>
         </div>
       </div>
