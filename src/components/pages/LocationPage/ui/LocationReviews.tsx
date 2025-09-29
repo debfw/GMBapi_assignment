@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useLocationReviews } from "@/hooks";
 import { ReviewList, ReviewsFilters } from "@/components/common";
-import type { FilterState } from "@/hooks/useReviewsFilters";
-import type { Review } from "@/services/types";
 import type { ReviewListResponse } from "@/services/types/ReviewListResponse";
+import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
+import type { Review } from "@/services/types";
+import { useGetLocationReviews } from "@/services";
 
 interface LocationReviewsProps {
   locationId?: string;
@@ -16,7 +16,12 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
   storeCode,
   showFilters = true,
 }) => {
-  const { getLocationReviews, isLoading, error, data } = useLocationReviews();
+  const {
+    mutate: getLocationReviews,
+    isPending: isLoading,
+    error,
+    data,
+  } = useGetLocationReviews();
   const [filters, setFilters] = useState({
     location_id: locationId,
     store_code: storeCode,
@@ -32,17 +37,17 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
   ) => {
     const newFilters = { ...filters, [key]: value, page: 1 };
     setFilters(newFilters);
-    getLocationReviews(newFilters);
+    getLocationReviews({ data: newFilters });
   };
 
   const handleSearch = () => {
-    getLocationReviews(filters);
+    getLocationReviews({ data: filters });
   };
 
   const handlePageChange = (page: number) => {
     const newFilters = { ...filters, page };
     setFilters(newFilters);
-    getLocationReviews(newFilters);
+    getLocationReviews({ data: newFilters });
   };
 
   const handleReply = (review: Review) => {
@@ -54,7 +59,6 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
   const reviews = typedData?.reviews || [];
   const pagination = typedData?.pagination;
 
-  // Convert location filters to the format expected by ReviewsFilters
   const filterState: FilterState = {
     searchTerm: "",
     selectedStarRating: filters.star_rating ?? "",
@@ -83,10 +87,10 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
                 has_comment: undefined,
               };
               setFilters(clearedFilters);
-              getLocationReviews(clearedFilters);
+              getLocationReviews({ data: clearedFilters });
             }}
-            onReplyStatusChange={() => {}} // Not applicable for location reviews
-            onBulkReply={() => {}} // Not applicable for location reviews
+            onReplyStatusChange={() => {}}
+            onBulkReply={() => {}}
             onRefreshReviews={handleSearch}
           />
         </div>

@@ -185,14 +185,11 @@ export const useBulkReply = () => {
       reviewService.processBulkReplies(request, setProgress),
     onSuccess: (result) => {
       if (result.success) {
-        // Invalidate and refetch reviews
         queryClient.invalidateQueries({ queryKey: ["reviews"] });
-        // Reset progress
         setProgress({ completed: 0, total: 0, currentReview: null });
       }
     },
     onError: () => {
-      // Reset progress on error
       setProgress({ completed: 0, total: 0, currentReview: null });
     },
   });

@@ -23,9 +23,8 @@ export interface ApiResponse<T = any> {
 const BASE_URL = import.meta.env.VITE_GMBAPI_BASE_URL;
 
 const defaultHeaders = {
-  "Content-Type": "application/json",
   Authorization: import.meta.env.VITE_GMBAPI_TOKEN,
-};
+} as Record<string, string>;
 
 async function client<T = any, E = any, B = any>(
   config: RequestConfig<B>
@@ -35,10 +34,17 @@ async function client<T = any, E = any, B = any>(
 
   const fullUrl = url.startsWith("http") ? url : `${BASE_URL}${url}`;
 
-  const requestHeaders = {
+  const requestHeaders: Record<string, string> = {
     ...defaultHeaders,
     ...headers,
   };
+
+  if (
+    requestBody !== undefined &&
+    requestHeaders["Content-Type"] === undefined
+  ) {
+    requestHeaders["Content-Type"] = "application/json";
+  }
 
   try {
     const response = await fetch(fullUrl, {
@@ -48,12 +54,27 @@ async function client<T = any, E = any, B = any>(
       signal,
     });
 
-    const responseData = await response.json();
+    let responseData: any = null;
+    const hasBody =
+      response.status !== 204 && response.headers.get("content-length") !== "0";
+    if (hasBody) {
+      const text = await response.text();
+      try {
+        responseData = text ? JSON.parse(text) : null;
+      } catch (_e) {
+        responseData = text;
+      }
+    }
 
     if (!response.ok) {
       const error: ResponseErrorConfig<E> = {
         status: response.status,
-        message: responseData?.message || response.statusText,
+        message:
+          (responseData &&
+          typeof responseData === "object" &&
+          "message" in responseData
+            ? (responseData as any).message
+            : undefined) || response.statusText,
         data: responseData,
       };
       throw error;

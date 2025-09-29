@@ -28,7 +28,7 @@ test.describe('Pagination', () => {
           expect(secondPageFirstReview).not.toBe(firstReviewText);
         }
 
-        const pageIndicator = page.locator('text=/Page 2|2 of|2\\//', 'button[aria-current="page"]:has-text("2")').first();
+        const pageIndicator = page.locator('text=/Page 2|2 of|2\\//, button[aria-current="page"]:has-text("2")').first();
         expect(await pageIndicator.isVisible()).toBeTruthy();
       }
     }
@@ -55,7 +55,7 @@ test.describe('Pagination', () => {
 
         expect(firstPageFirstReview).not.toBe(secondPageFirstReview);
 
-        const pageIndicator = page.locator('text=/Page 1|1 of|1\\//', 'button[aria-current="page"]:has-text("1")').first();
+        const pageIndicator = page.locator('text=/Page 1|1 of|1\\//, button[aria-current="page"]:has-text("1")').first();
         expect(await pageIndicator.isVisible()).toBeTruthy();
       }
     }
@@ -82,7 +82,7 @@ test.describe('Pagination', () => {
           expect(page3Text).not.toBe(firstPageText);
         }
 
-        const pageIndicator = page.locator('text=/Page 3|3 of|3\\//', 'button[aria-current="page"]:has-text("3")').first();
+        const pageIndicator = page.locator('text=/Page 3|3 of|3\\//, button[aria-current="page"]:has-text("3")').first();
         expect(await pageIndicator.isVisible()).toBeTruthy();
       }
     }
@@ -111,7 +111,7 @@ test.describe('Pagination', () => {
           expect(firstPageText).not.toBe(lastPageText);
         }
 
-        const pageIndicator = page.locator('text=/Page 1|1 of|1\\//', 'button[aria-current="page"]:has-text("1")').first();
+        const pageIndicator = page.locator('text=/Page 1|1 of|1\\//, button[aria-current="page"]:has-text("1")').first();
         expect(await pageIndicator.isVisible()).toBeTruthy();
       }
     }

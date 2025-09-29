@@ -121,6 +121,9 @@
 
 /* UI Component Styles */
 @layer components {
+  .bulk-select-toggle-btn {
+    width: 30% !important;
+  }
   /* MetricCard styles */
   .metric-card-icon {
     color: var(--metric-card-icon-color, var(--color-primary, #005085));

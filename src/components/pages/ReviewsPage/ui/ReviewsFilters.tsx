@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "react-bootstrap";
 import { Search } from "lucide-react";
-import type { FilterState } from "@/hooks/useReviewsFilters";
+import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
 
 interface ReviewsFiltersProps {
   filterState: FilterState;

@@ -7,7 +7,11 @@ import type {
   GetReviews500,
 } from "../types/GetReviews.ts";
 import type { RequestConfig, ResponseErrorConfig } from "@/services/client";
-import type { UseMutationOptions, QueryClient } from "@tanstack/react-query";
+import type {
+  UseMutationOptions,
+  UseMutationResult,
+  QueryClient,
+} from "@tanstack/react-query";
 import { mutationOptions, useMutation } from "@tanstack/react-query";
 
 export const getReviewsMutationKey = () =>
@@ -24,7 +28,7 @@ export async function getReviews(
   data?: GetReviewsMutationRequest,
   config: Partial<RequestConfig<GetReviewsMutationRequest>> & {
     client?: typeof fetch;
-  } = {},
+  } = {}
 ) {
   const { client: request = fetch, ...requestConfig } = config;
 
@@ -46,7 +50,7 @@ export async function getReviews(
 export function getReviewsMutationOptions(
   config: Partial<RequestConfig<GetReviewsMutationRequest>> & {
     client?: typeof fetch;
-  } = {},
+  } = {}
 ) {
   const mutationKey = getReviewsMutationKey();
   return mutationOptions<
@@ -78,7 +82,7 @@ export function useGetReviews<TContext>(
     client?: Partial<RequestConfig<GetReviewsMutationRequest>> & {
       client?: typeof fetch;
     };
-  } = {},
+  } = {}
 ) {
   const { mutation = {}, client: config = {} } = options ?? {};
   const { client: queryClient, ...mutationOptions } = mutation;
@@ -90,8 +94,8 @@ export function useGetReviews<TContext>(
       mutationKey,
       ...mutationOptions,
     } as unknown as UseMutationOptions,
-    queryClient,
-  ) as UseMutationOptions<
+    queryClient
+  ) as unknown as UseMutationResult<
     GetReviewsMutationResponse,
     ResponseErrorConfig<GetReviews400 | GetReviews401 | GetReviews500>,
     { data?: GetReviewsMutationRequest },

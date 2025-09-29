@@ -47,7 +47,7 @@ test.describe("Review Reply Workflow", () => {
     const replyButton = page.getByRole("button", { name: /reply/i }).first();
     await replyButton.click();
 
-    const textarea = page.getByRole("textbox");
+    page.getByRole("textbox");
 
     // Try to send empty reply
     const sendButton = page.getByRole("button", { name: /send reply/i });

@@ -12,6 +12,14 @@ export default defineConfig({
     css: true,
     include: ["tests/unit/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     exclude: ["tests/e2e/**/*", "node_modules/**/*"],
+    pool: "forks",
+    poolOptions: {
+      forks: {
+        singleFork: true,
+        isolate: true,
+      },
+    },
+    sequence: { concurrent: false },
   },
   resolve: {
     alias: {

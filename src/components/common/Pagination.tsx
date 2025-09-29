@@ -3,13 +3,13 @@ import { Pagination as BsPagination } from "react-bootstrap";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Pagination as PaginationType } from "@/services/types";
 
-interface ReviewPaginationProps {
+interface PaginationProps {
   pagination: PaginationType;
   onPageChange: (page: number) => void;
   className?: string;
 }
 
-export const ReviewPagination: React.FC<ReviewPaginationProps> = ({
+export const Pagination: React.FC<PaginationProps> = ({
   pagination,
   onPageChange,
   className = "",

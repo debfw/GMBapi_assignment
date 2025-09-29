@@ -1,8 +1,8 @@
-export { useReviewsFilters } from "./useReviewsFilters";
 export { useDebounce } from "./useDebounce";
-export { useReviews } from "./useReviews";
 
-// New service-based hooks
+// Reviews domain hooks (page-scoped location)
+export { useReviews } from "@/components/pages/ReviewsPage/hooks/useReviews";
+export { useReviewsFilters } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
 export {
   useReviewFilters,
   useReviews as useReviewsService,
@@ -10,13 +10,4 @@ export {
   useReviewSuggestion,
   useBulkReply,
   useApiRateLimit,
-} from "./useReviewService";
-export { useAccountKPIs } from "./useAccountKPIs";
-export { useLocations, useLocationsData } from "./useLocations";
-export {
-  useLocationProfile,
-  useLocationProfileData,
-} from "./useLocationProfile";
-export { useLocationLabels } from "./useLocationLabels";
-export { useLocationHygiene } from "./useLocationHygiene";
-export { useLocationReviews } from "./useLocationReviews";
+} from "@/components/pages/ReviewsPage/hooks/useReviewService";

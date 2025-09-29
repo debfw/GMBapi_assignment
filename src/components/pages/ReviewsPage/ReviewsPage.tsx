@@ -84,7 +84,7 @@ export const ReviewsPage: React.FC = () => {
   const reviews = data?.reviews || [];
 
   const filteredReviews = searchTerm.trim()
-    ? reviews.filter((review) => {
+    ? reviews.filter((review: Review) => {
         const searchLower = searchTerm.toLowerCase();
         return (
           review.comment?.toLowerCase().includes(searchLower) ||
@@ -171,7 +171,6 @@ export const ReviewsPage: React.FC = () => {
       {/* Modals */}
       <SingleReviewReplyModal
         show={isReplyOpen && selectedReview !== null}
-        reviewId={selectedReview?.id || ""}
         reviewText={selectedReview?.text || ""}
         customerName={selectedReview?.customerName || ""}
         onClose={handleCloseReplyModal}

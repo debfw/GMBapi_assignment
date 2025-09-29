@@ -5,6 +5,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { replyToReviewMutationOptions } from "@/services/hooks/useReplyToReview";
 
 type ModalContextState = {
   isReplyOpen: boolean;
@@ -13,6 +15,16 @@ type ModalContextState = {
   closeReply: () => void;
   openBulk: () => void;
   closeBulk: () => void;
+  submitSingleReply: (args: {
+    reviewId: string;
+    text: string;
+    isPublic: boolean;
+  }) => Promise<void>;
+  submitBulkReply: (args: {
+    reviewIds: string[];
+    text: string;
+    isPublic: boolean;
+  }) => Promise<void>;
 };
 
 const ModalContext = createContext<ModalContextState | undefined>(undefined);
@@ -28,6 +40,53 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
   const openBulk = useCallback(() => setIsBulkOpen(true), []);
   const closeBulk = useCallback(() => setIsBulkOpen(false), []);
 
+  // Shared reply mutations
+  const singleReplyMutation = useMutation({
+    ...replyToReviewMutationOptions(),
+  });
+
+  const submitSingleReply = useCallback(
+    async ({
+      reviewId,
+      text,
+      isPublic,
+    }: {
+      reviewId: string;
+      text: string;
+      isPublic: boolean;
+    }) => {
+      await singleReplyMutation.mutateAsync({
+        reviewId,
+        data: { text, isPublic },
+      });
+    },
+    [singleReplyMutation]
+  );
+
+  const submitBulkReply = useCallback(
+    async ({
+      reviewIds,
+      text,
+      isPublic,
+    }: {
+      reviewIds: string[];
+      text: string;
+      isPublic: boolean;
+    }) => {
+      for (const id of reviewIds) {
+        try {
+          await singleReplyMutation.mutateAsync({
+            reviewId: id,
+            data: { text, isPublic },
+          });
+        } catch (_e) {
+          // continue
+        }
+      }
+    },
+    [singleReplyMutation]
+  );
+
   const value = useMemo(
     () => ({
       isReplyOpen,
@@ -36,8 +95,19 @@ export const ModalProvider: React.FC<{ children: React.ReactNode }> = ({
       closeReply,
       openBulk,
       closeBulk,
+      submitSingleReply,
+      submitBulkReply,
     }),
-    [isReplyOpen, isBulkOpen, openReply, closeReply, openBulk, closeBulk]
+    [
+      isReplyOpen,
+      isBulkOpen,
+      openReply,
+      closeReply,
+      openBulk,
+      closeBulk,
+      submitSingleReply,
+      submitBulkReply,
+    ]
   );
 
   return (

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
-import { useLocationsData } from "@/hooks";
 import {
   Search,
   Filter,
@@ -15,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useLocationsData } from "./hooks/useLocations";
 
 export const LocationsPage: React.FC = () => {
   const navigate = useNavigate();

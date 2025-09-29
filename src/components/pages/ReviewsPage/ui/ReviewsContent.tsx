@@ -2,7 +2,7 @@ import React from "react";
 import { ReviewList } from "@/components/common";
 import { COLORS } from "@/styles/design-system";
 import type { Review, Pagination as PaginationType } from "@/services/types";
-import type { FilterState } from "@/hooks/useReviewsFilters";
+import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
 
 interface ReviewsContentProps {
   reviews: Review[];
@@ -38,7 +38,7 @@ export const ReviewsContent: React.FC<ReviewsContentProps> = React.memo(
       );
 
       if (hasApiFilters) {
-        const filterList = [];
+        const filterList = [] as string[];
         if (filterState.selectedStarRating !== "")
           filterList.push(`${filterState.selectedStarRating} stars`);
         if (filterState.replyStatus)

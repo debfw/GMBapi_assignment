@@ -5,7 +5,7 @@ import { ReviewPagination } from "@/components/common";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useStableCallback } from "@/utils/memoization";
 import type { Review, Pagination as PaginationType } from "@/services/types";
-import type { FilterState } from "@/hooks/useReviewsFilters";
+import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
 
 interface ReviewListProps {
   reviews: Review[];
@@ -58,7 +58,7 @@ export const ReviewList: React.FC<ReviewListProps> = React.memo(
         } else if (filterState?.replyStatus === "replied") {
           return "No replied reviews found. Try checking if there are any reviews with business replies.";
         } else if (filterState?.selectedStarRating) {
-          return `No ${filterState.selectedStarRating}-star reviews found. Try adjusting the star rating filter.`;
+          return `${filterState.selectedStarRating}-star reviews not found. Try adjusting the star rating filter.`;
         }
         return "Try adjusting your filters or check back later for new reviews.";
       };

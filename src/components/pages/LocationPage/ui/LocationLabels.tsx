@@ -1,7 +1,7 @@
 import React from "react";
-import { useLocationLabels } from "@/hooks";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { Tag, Plus } from "lucide-react";
+import { useGetAccountLocationLabels } from "@/services";
 
 interface LocationLabelsProps {
   selectedLabelId?: string;
@@ -16,7 +16,12 @@ export const LocationLabels: React.FC<LocationLabelsProps> = ({
   showAddButton = false,
   onAddLabel,
 }) => {
-  const { labels, isLoading, error, refetch } = useLocationLabels();
+  const {
+    data: labels,
+    isLoading,
+    error,
+    refetch,
+  } = useGetAccountLocationLabels();
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -40,7 +45,7 @@ export const LocationLabels: React.FC<LocationLabelsProps> = ({
 
   return (
     <div className="d-flex flex-wrap gap-2 align-items-center">
-      {labels.map((label) => (
+      {labels?.payload.map((label) => (
         <button
           key={label.id}
           className={`btn btn-sm d-flex align-items-center ${

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Locations Page Full View", () => {
   test("full page with bottom pagination - desktop", async ({ page }) => {

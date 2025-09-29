@@ -32,7 +32,7 @@ export const ReviewSelection: React.FC<ReviewSelectionProps> = React.memo(
             variant="outline-primary"
             size="sm"
             onClick={onSelectAll}
-            className="d-flex align-items-center"
+            className="d-flex align-items-center bulk-select-toggle-btn"
           >
             <CheckCircle size={16} className="me-2" />
             {isAllSelected ? "Deselect All" : "Select All"}

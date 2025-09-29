@@ -2,13 +2,9 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "react-bootstrap";
 import { Send, X, Users } from "lucide-react";
 import { ReviewSelection } from "./ReviewSelection";
-import { useMutation } from "@tanstack/react-query";
-import { replyToReviewMutationOptions } from "@/services/hooks/useReplyToReview";
-import { useAISuggestion } from "@/hooks/useAISuggestion";
-import { AISuggestionDisplay } from "@/components/common/AISuggestionDisplay";
 import type { Review } from "@/services/types";
-import { ReplyForm } from "../../../common/ReplyForm";
-import { ReplyModalLayout } from "../../../common/ReplyModalLayout";
+import { ReplyForm } from "@/components/common/ReplyForm";
+import { ReplyModalLayout } from "@/components/common/ReplyModalLayout";
 
 interface BulkReplyModalProps {
   show: boolean;
@@ -23,29 +19,12 @@ type BulkReplyFormData = {
 };
 
 export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
-  ({ show, reviews, onClose, onSuccess }) => {
+  ({ show, reviews, onClose }) => {
     const [selectedReviews, setSelectedReviews] = useState<Set<string>>(
       new Set()
     );
     const [characterCount, setCharacterCount] = useState(0);
     const [showApiWarning, setShowApiWarning] = useState(false);
-
-    const {
-      aiSuggestion,
-      showSuggestion,
-      hasSuggestion,
-      isLoading: isSuggestionLoading,
-      handleGetSuggestion: getSuggestion,
-      handleUseSuggestion,
-      clearSuggestion,
-    } = useAISuggestion();
-
-    const replyMutation = useMutation({
-      ...replyToReviewMutationOptions(),
-      onError: () => {
-        setShowApiWarning(true);
-      },
-    });
 
     useEffect(() => {
       if (show) {
@@ -55,56 +34,24 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
     }, [show, reviews]);
 
     const handleFormSubmit = useCallback(
-      async (data: BulkReplyFormData) => {
+      async (_data: BulkReplyFormData) => {
         if (selectedReviews.size === 0) return;
-        for (const reviewId of selectedReviews) {
-          try {
-            await replyMutation.mutateAsync({
-              reviewId,
-              data: { text: data.text, isPublic: data.isPublic },
-            });
-          } catch (e) {
-            // continue to next
-          }
-        }
-        onSuccess?.();
-        handleClose();
+        // Do not call API for now; show a summary immediately
+        setShowApiWarning(true);
+        return;
       },
-      [selectedReviews, replyMutation, onSuccess]
+      [selectedReviews]
     );
 
     const handleClose = useCallback(() => {
       setSelectedReviews(new Set());
       setCharacterCount(0);
-      clearSuggestion();
       setShowApiWarning(false);
       onClose();
-    }, [onClose, clearSuggestion]);
-
-    const handleGetSuggestion = useCallback(() => {
-      const firstId = [...selectedReviews][0];
-      const firstReview = reviews.find((r) => r.id === firstId);
-      if (firstReview) getSuggestion(firstReview.comment);
-    }, [selectedReviews, reviews, getSuggestion]);
-
-    const handleSelectAll = useCallback(() => {
-      const replyable = reviews.filter((r) => r.status === "new");
-      if (selectedReviews.size === replyable.length)
-        setSelectedReviews(new Set());
-      else setSelectedReviews(new Set(replyable.map((r) => r.id)));
-    }, [selectedReviews.size, reviews]);
-
-    const handleSelectReview = useCallback((reviewId: string) => {
-      setSelectedReviews((prev) => {
-        const next = new Set(prev);
-        if (next.has(reviewId)) next.delete(reviewId);
-        else next.add(reviewId);
-        return next;
-      });
-    }, []);
+    }, [onClose]);
 
     const isOverLimit = characterCount > 1000;
-    const isSubmitting = replyMutation.isPending;
+    const isSubmitting = false;
 
     return (
       <ReplyModalLayout
@@ -123,12 +70,15 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
                 border: "1px solid #fecaca",
               }}
             >
-              <strong>API Under Development:</strong> The reply functionality is
-              currently under development and not yet available. Please check
-              back later.
+              <strong>Preview only:</strong> Replies are not sent yet. Your text
+              will be applied to <strong>{selectedReviews.size}</strong>{" "}
+              selected reviews.
             </div>
           ) : undefined
         }
+        aiSuggestionConfig={{
+          onSuggestionApplied: () => {},
+        }}
         footerRight={
           <>
             <Button
@@ -174,20 +124,20 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
         <ReviewSelection
           reviews={reviews}
           selectedReviews={selectedReviews}
-          onSelectAll={handleSelectAll}
-          onSelectReview={handleSelectReview}
-        />
-
-        <AISuggestionDisplay
-          suggestion={aiSuggestion}
-          showSuggestion={showSuggestion}
-          hasSuggestion={hasSuggestion}
-          isLoading={isSuggestionLoading}
-          onGetSuggestion={handleGetSuggestion}
-          onUseSuggestion={handleUseSuggestion}
-          disabled={selectedReviews.size === 0}
-          buttonText={`Get Suggestion for ${selectedReviews.size} Reviews`}
-          className="mb-3"
+          onSelectAll={() => {
+            const replyable = reviews.filter((r) => r.status === "new");
+            if (selectedReviews.size === replyable.length)
+              setSelectedReviews(new Set());
+            else setSelectedReviews(new Set(replyable.map((r) => r.id)));
+          }}
+          onSelectReview={(reviewId: string) => {
+            setSelectedReviews((prev) => {
+              const next = new Set(prev);
+              if (next.has(reviewId)) next.delete(reviewId);
+              else next.add(reviewId);
+              return next;
+            });
+          }}
         />
 
         <ReplyForm
@@ -196,8 +146,11 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
           characterCount={characterCount}
           isSubmitting={isSubmitting}
           selectedCount={selectedReviews.size}
-          aiSuggestion={aiSuggestion}
-          onUseSuggestion={handleUseSuggestion}
+          getSuggestionPrompt={() => {
+            const firstId = [...selectedReviews][0];
+            const firstReview = reviews.find((r) => r.id === firstId);
+            return firstReview?.comment || "";
+          }}
         />
       </ReplyModalLayout>
     );

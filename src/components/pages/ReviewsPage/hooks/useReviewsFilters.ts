@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useDebounce } from "./useDebounce";
+import { useDebounce } from "@/hooks/useDebounce";
 import type { ReviewFilters as ReviewFiltersType } from "@/services/types";
 import { PAGINATION } from "@/utils/constants";
 
@@ -16,7 +16,6 @@ export interface UseReviewsFiltersReturn {
   handleSearchChange: (value: string) => void;
   handleStarRatingChange: (value: string) => void;
   handleClearFilters: () => void;
-  setDatePreset: (preset: string) => void;
   setFilters: (filters: ReviewFiltersType) => void;
   handleReplyStatusChange: (value: string) => void;
 }
@@ -69,10 +68,6 @@ export const useReviewsFilters = (): UseReviewsFiltersReturn => {
     setFilters(initialFilters);
   }, []);
 
-  const setDatePreset = useCallback((_preset: string) => {
-    // Date preset functionality removed - time filter now only affects UI state
-  }, []);
-
   const handleReplyStatusChange = useCallback(
     (value: string) => {
       setFilterState((prev) => ({ ...prev, replyStatus: value }));
@@ -99,7 +94,6 @@ export const useReviewsFilters = (): UseReviewsFiltersReturn => {
     handleSearchChange,
     handleStarRatingChange,
     handleClearFilters,
-    setDatePreset,
     setFilters,
     handleReplyStatusChange,
   };

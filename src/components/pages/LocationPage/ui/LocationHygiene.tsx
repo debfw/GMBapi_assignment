@@ -1,5 +1,4 @@
 import React from "react";
-import { useLocationHygiene } from "@/hooks";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import {
   CheckCircle,
@@ -16,6 +15,7 @@ import {
   Camera,
   Settings,
 } from "lucide-react";
+import { useGetAccountLocationHygiene } from "@/services";
 
 interface LocationHygieneProps {
   locationId: string;
@@ -26,7 +26,11 @@ export const LocationHygiene: React.FC<LocationHygieneProps> = ({
   locationId,
   showDetails = true,
 }) => {
-  const { hygiene, isLoading, error } = useLocationHygiene(locationId);
+  const {
+    data: hygiene,
+    isLoading,
+    error,
+  } = useGetAccountLocationHygiene(locationId);
 
   if (isLoading) {
     return <LoadingSpinner />;
@@ -96,14 +100,16 @@ export const LocationHygiene: React.FC<LocationHygieneProps> = ({
         <div className="d-flex align-items-center justify-content-between mb-2">
           <h6 className="mb-0">Overall Health</h6>
           <div className="d-flex align-items-center">
-            <span className="fw-bold me-2">{Math.round(hygiene.health)}%</span>
-            {getHealthIcon(hygiene.health)}
+            <span className="fw-bold me-2">
+              {Math.round(hygiene.payload.health)}%
+            </span>
+            {getHealthIcon(hygiene.payload.health)}
           </div>
         </div>
         <div className="progress" style={{ height: "8px" }}>
           <div
-            className={`progress-bar bg-${getHealthColor(hygiene.health)}`}
-            style={{ width: `${hygiene.health}%` }}
+            className={`progress-bar bg-${getHealthColor(hygiene.payload.health)}`}
+            style={{ width: `${hygiene.payload.health}%` }}
           ></div>
         </div>
       </div>
@@ -116,7 +122,7 @@ export const LocationHygiene: React.FC<LocationHygieneProps> = ({
             {hygieneItems.map((item) => {
               const Icon = item.icon;
               const isComplete =
-                hygiene[item.key as keyof typeof hygiene] === 1;
+                hygiene.payload[item.key as keyof typeof hygiene.payload] === 1;
 
               return (
                 <div key={item.key} className="col-6 mb-2">

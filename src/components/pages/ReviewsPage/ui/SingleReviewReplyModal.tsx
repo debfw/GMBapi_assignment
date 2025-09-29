@@ -1,32 +1,12 @@
-import React, { useState } from "react";
-import { Form, Button, Alert } from "react-bootstrap";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import React, { useCallback, useState } from "react";
+import { Button, Alert } from "react-bootstrap";
 import { MessageCircle, Send, X } from "lucide-react";
 import { REPLY_LIMITS } from "@/utils/constants";
-import { useMutation } from "@tanstack/react-query";
-import { replyToReviewMutationOptions } from "@/services/hooks/useReplyToReview";
-import { useAISuggestion } from "@/hooks/useAISuggestion";
-import { AISuggestionDisplay } from "@/components/common/AISuggestionDisplay";
 import { ReplyModalLayout } from "@/components/common/ReplyModalLayout";
-
-const replySchema = z.object({
-  text: z
-    .string()
-    .min(REPLY_LIMITS.MIN_LENGTH, "Reply cannot be empty")
-    .max(
-      REPLY_LIMITS.MAX_LENGTH,
-      `Reply must be less than ${REPLY_LIMITS.MAX_LENGTH} characters`
-    ),
-  isPublic: z.boolean().default(true),
-});
-
-type ReplyFormData = z.infer<typeof replySchema>;
+import { ReplyForm } from "@/components/common/ReplyForm";
 
 interface ReviewReplyProps {
   show: boolean;
-  reviewId: string;
   reviewText: string;
   customerName: string;
   onClose: () => void;
@@ -35,101 +15,33 @@ interface ReviewReplyProps {
 
 export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
   show,
-  reviewId,
   reviewText,
   customerName,
   onClose,
-  onSuccess,
 }) => {
   const [characterCount, setCharacterCount] = useState(0);
-  const [isTyping, setIsTyping] = useState(false);
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout | null>(
-    null
-  );
   const [showApiWarning, setShowApiWarning] = useState(false);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const {
-    aiSuggestion,
-    showSuggestion,
-    hasSuggestion,
-    isLoading: isSuggestionLoading,
-    handleGetSuggestion: getSuggestion,
-    handleUseSuggestion,
-    clearSuggestion,
-  } = useAISuggestion({
-    onSuggestionUsed: (suggestion) => setValue("text", suggestion),
-  });
-
-  const replyMutation = useMutation({
-    ...replyToReviewMutationOptions(),
-    onSuccess: () => {
-      onSuccess?.();
-      handleClose();
+  const handleFormSubmit = useCallback(
+    async (data: { text: string; isPublic: boolean }) => {
+      // Do not call API for now; show the text immediately as a success preview
+      setShowApiWarning(false);
+      setSuccessMessage(`Preview only: "${data.text}"`);
+      return;
     },
-    onError: (_error) => {
-      setShowApiWarning(true);
-    },
-  });
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    watch,
-    reset,
-    setValue,
-  } = useForm<ReplyFormData>({
-    resolver: zodResolver(replySchema),
-    defaultValues: {
-      isPublic: true,
-    },
-  });
-
-  const watchedText = watch("text", "");
-
-  React.useEffect(() => {
-    setCharacterCount(watchedText.length);
-  }, [watchedText]);
-
-  const handleFormSubmit = (data: ReplyFormData) => {
-    replyMutation.mutate({
-      reviewId,
-      data: {
-        text: data.text,
-        isPublic: data.isPublic,
-      },
-    });
-  };
+    []
+  );
 
   const handleClose = () => {
-    reset();
     setCharacterCount(0);
-    clearSuggestion();
     setShowApiWarning(false);
+    setSuccessMessage(null);
     onClose();
   };
 
   const isOverLimit = characterCount > REPLY_LIMITS.MAX_LENGTH;
-  const remainingChars = REPLY_LIMITS.MAX_LENGTH - characterCount;
-
-  const handleGetSuggestion = () => {
-    getSuggestion(reviewText);
-  };
-
-  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value;
-    setValue("text", value);
-
-    setIsTyping(true);
-    if (typingTimeout) {
-      clearTimeout(typingTimeout);
-    }
-    const timeout = setTimeout(() => {
-      setIsTyping(false);
-    }, 1000);
-
-    setTypingTimeout(timeout);
-  };
+  const [submitForm, setSubmitForm] = useState<(() => void) | null>(null);
 
   return (
     <ReplyModalLayout
@@ -142,18 +54,22 @@ export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
       warningNode={
         showApiWarning ? (
           <Alert variant="warning" className="mb-4 review-reply-alert">
-            <strong>API Under Development:</strong> The reply functionality is
-            currently under development and not yet available. Please check back
-            later.
+            <strong>API Under Development:</strong> Replies are not sent yet.
+            Showing your text below.
+          </Alert>
+        ) : successMessage ? (
+          <Alert variant="success" className="mb-4 review-reply-alert">
+            {successMessage}
           </Alert>
         ) : undefined
       }
+      aiSuggestionConfig={{}}
       footerRight={
         <>
           <Button
             variant="outline-secondary"
             onClick={handleClose}
-            disabled={replyMutation.isPending}
+            disabled={false}
             className="d-flex align-items-center review-reply-cancel-button px-4"
           >
             <X size={16} className="me-2" />
@@ -161,13 +77,11 @@ export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
           </Button>
           <Button
             variant="primary"
-            onClick={handleSubmit(handleFormSubmit)}
-            disabled={
-              replyMutation.isPending || isOverLimit || characterCount === 0
-            }
+            onClick={() => submitForm && submitForm()}
+            disabled={isOverLimit || characterCount === 0}
             className="d-flex align-items-center review-reply-send-button px-4"
           >
-            {replyMutation.isPending ? (
+            {false ? (
               <>
                 <div
                   className="spinner-border spinner-border-sm me-2 review-reply-spinner"
@@ -196,60 +110,18 @@ export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
         </div>
       </div>
 
-      <AISuggestionDisplay
-        suggestion={aiSuggestion}
-        showSuggestion={showSuggestion}
-        hasSuggestion={hasSuggestion}
-        isLoading={isSuggestionLoading}
-        onGetSuggestion={handleGetSuggestion}
-        onUseSuggestion={handleUseSuggestion}
-        disabled={isTyping || !reviewText.trim()}
-        className="mb-4"
+      <ReplyForm
+        onSubmit={handleFormSubmit}
+        onTextChange={setCharacterCount}
+        characterCount={characterCount}
+        isSubmitting={false}
+        selectedCount={1}
+        getSuggestionPrompt={() => reviewText}
+        registerSubmit={useCallback(
+          (fn: () => void) => setSubmitForm(() => fn),
+          []
+        )}
       />
-
-      <Form onSubmit={handleSubmit(handleFormSubmit)}>
-        <Form.Group className="mb-4">
-          <Form.Label className="fw-medium mb-3">Reply Text</Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={4}
-            placeholder="Write a professional and helpful reply..."
-            {...register("text")}
-            onChange={handleTextChange}
-            isInvalid={!!errors.text}
-            className="bulk-reply-textarea"
-          />
-          <Form.Control.Feedback type="invalid" className="mt-2">
-            {errors.text?.message}
-          </Form.Control.Feedback>
-          <div className="d-flex justify-content-between mt-3">
-            <Form.Text
-              className={isOverLimit ? "text-danger" : "text-muted small"}
-            >
-              {characterCount} / {REPLY_LIMITS.MAX_LENGTH} characters
-              {isOverLimit && " (over limit)"}
-            </Form.Text>
-            {remainingChars < 50 && remainingChars > 0 && (
-              <Form.Text className="text-warning small">
-                {remainingChars} characters remaining
-              </Form.Text>
-            )}
-          </div>
-        </Form.Group>
-
-        <Form.Group className="mb-4">
-          <Form.Check
-            type="checkbox"
-            label="Make this reply public (visible to customers)"
-            {...register("isPublic")}
-            className="mb-3"
-          />
-          <Form.Text className="text-muted small">
-            Public replies will be visible to customers and other potential
-            customers.
-          </Form.Text>
-        </Form.Group>
-      </Form>
     </ReplyModalLayout>
   );
 };

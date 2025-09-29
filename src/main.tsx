@@ -4,52 +4,48 @@ import "./index.css";
 import "./styles/mobile.css";
 import App from "./App.tsx";
 import { ModalProvider } from "@/stores/ModalContext";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { queryClient } from "@/stores/queryClient";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
-// Suppress Iterable-related errors from browser extensions
-const originalConsoleError = console.error;
-console.error = (...args) => {
-  const message = args.join(" ");
-  if (
-    message.includes("iterable") ||
-    message.includes("Iterable") ||
-    message.includes("Not supported: in app messages")
-  ) {
-    // Suppress Iterable-related errors
-    return;
-  }
-  originalConsoleError.apply(console, args);
-};
+if (import.meta.env.DEV) {
+  const originalConsoleError = console.error;
+  console.error = (...args) => {
+    const message = args.join(" ");
+    if (message.includes("Not supported: in app messages")) {
+      return;
+    }
+    originalConsoleError.apply(console, args);
+  };
 
-// Global error handler to catch Iterable-related errors
-window.addEventListener("error", (event) => {
-  if (
-    event.message &&
-    (event.message.includes("iterable") ||
-      event.message.includes("Iterable") ||
-      event.message.includes("Not supported: in app messages"))
-  ) {
-    event.preventDefault();
-    return false;
-  }
-});
+  window.addEventListener("error", (event) => {
+    if (
+      event.message &&
+      event.message.includes("Not supported: in app messages")
+    ) {
+      event.preventDefault();
+      return false;
+    }
+  });
 
-// Global unhandled promise rejection handler
-window.addEventListener("unhandledrejection", (event) => {
-  if (
-    event.reason &&
-    (event.reason.toString().includes("iterable") ||
-      event.reason.toString().includes("Iterable") ||
-      event.reason.toString().includes("Not supported: in app messages"))
-  ) {
-    event.preventDefault();
-    return false;
-  }
-});
+  window.addEventListener("unhandledrejection", (event) => {
+    if (
+      event.reason &&
+      event.reason.toString().includes("Not supported: in app messages")
+    ) {
+      event.preventDefault();
+      return false;
+    }
+  });
+}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <ModalProvider>
-      <App />
-    </ModalProvider>
+    <QueryClientProvider client={queryClient}>
+      <ModalProvider>
+        <App />
+      </ModalProvider>
+      {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
+    </QueryClientProvider>
   </StrictMode>
 );

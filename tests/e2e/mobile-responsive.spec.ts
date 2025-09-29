@@ -82,10 +82,10 @@ test.describe("Mobile Responsiveness - iPhone 14 Pro (390x844)", () => {
     await expect(reviewsHeader).toBeVisible();
 
     // Check if Google Reviews text is visible
-    const googleText = page.locator("text=/Google/i").first();
+    page.locator("text=/Google/i").first();
 
     // Check average rating display
-    const avgRating = page.locator(".average-rating, .rating-display").first();
+    page.locator(".average-rating, .rating-display").first();
 
     // Take screenshot of header
     await page.screenshot({

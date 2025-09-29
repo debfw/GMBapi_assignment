@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Reviews Page Alignment", () => {
   test("check showing text alignment - mobile", async ({ page }) => {

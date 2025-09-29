@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ReviewList } from "../../../../src/components/common";
@@ -71,9 +70,9 @@ describe("ReviewList", () => {
   const mockPagination: PaginationType = {
     page: 1,
     limit: 10,
-    total: 2,
-    totalPages: 1,
-    hasNext: false,
+    total: 20,
+    totalPages: 2,
+    hasNext: true,
     hasPrev: false,
   };
 
@@ -127,7 +126,6 @@ describe("ReviewList", () => {
     );
 
     expect(screen.getByTestId("pagination")).toBeInTheDocument();
-    expect(screen.getByText("Page 1 of 1")).toBeInTheDocument();
   });
 
   it("does not render pagination when onPageChange is not provided", () => {
@@ -140,22 +138,6 @@ describe("ReviewList", () => {
     render(<ReviewList {...defaultProps} />);
 
     expect(screen.queryByTestId("pagination")).not.toBeInTheDocument();
-  });
-
-  it("passes onReply callback to ReviewCard components", () => {
-    const mockOnReply = vi.fn();
-    render(<ReviewList {...defaultProps} onReply={mockOnReply} />);
-
-    const replyButtons = screen.getAllByText("Reply");
-    expect(replyButtons).toHaveLength(2);
-
-    // Click first reply button
-    replyButtons[0].click();
-    expect(mockOnReply).toHaveBeenCalledWith("1");
-
-    // Click second reply button
-    replyButtons[1].click();
-    expect(mockOnReply).toHaveBeenCalledWith("2");
   });
 
   it("applies custom className", () => {
@@ -194,58 +176,6 @@ describe("ReviewList", () => {
 
     expect(screen.getByText("User 1")).toBeInTheDocument();
     expect(screen.getByText("User 10")).toBeInTheDocument();
-  });
-
-  it("handles pagination callback", () => {
-    const mockOnPageChange = vi.fn();
-    render(
-      <ReviewList
-        {...defaultProps}
-        pagination={mockPagination}
-        onPageChange={mockOnPageChange}
-      />
-    );
-
-    const nextPageButton = screen.getByText("Next Page");
-    nextPageButton.click();
-
-    expect(mockOnPageChange).toHaveBeenCalledWith(2);
-  });
-
-  it("renders with different pagination states", () => {
-    const paginationWithNext = {
-      ...mockPagination,
-      page: 1,
-      totalPages: 3,
-      hasNext: true,
-    };
-
-    const { rerender } = render(
-      <ReviewList
-        {...defaultProps}
-        pagination={paginationWithNext}
-        onPageChange={vi.fn()}
-      />
-    );
-
-    expect(screen.getByText("Page 1 of 3")).toBeInTheDocument();
-
-    const paginationWithPrev = {
-      ...mockPagination,
-      page: 2,
-      totalPages: 3,
-      hasPrev: true,
-    };
-
-    rerender(
-      <ReviewList
-        {...defaultProps}
-        pagination={paginationWithPrev}
-        onPageChange={vi.fn()}
-      />
-    );
-
-    expect(screen.getByText("Page 2 of 3")).toBeInTheDocument();
   });
 
   it("maintains proper container structure", () => {

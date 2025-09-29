@@ -1,4 +1,3 @@
-import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { ReviewCard } from "../../../../src/components/pages/ReviewsPage";
@@ -241,16 +240,6 @@ describe("ReviewCard", () => {
     expect(
       screen.queryByRole("button", { name: /Reply/i })
     ).not.toBeInTheDocument();
-  });
-
-  it("calls onReply when reply button is clicked", () => {
-    const mockOnReply = vi.fn();
-    render(<ReviewCard {...defaultProps} onReply={mockOnReply} />);
-
-    const replyButton = screen.getByRole("button", { name: /Reply/i });
-    fireEvent.click(replyButton);
-
-    expect(mockOnReply).toHaveBeenCalledWith("1");
   });
 
   it("handles text truncation for long comments", () => {

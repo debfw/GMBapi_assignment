@@ -7,7 +7,11 @@ import type {
   GetLocationReviews500,
 } from "../types/GetLocationReviews.ts";
 import type { RequestConfig, ResponseErrorConfig } from "@/services/client";
-import type { UseMutationOptions, QueryClient } from "@tanstack/react-query";
+import type {
+  UseMutationOptions,
+  UseMutationResult,
+  QueryClient,
+} from "@tanstack/react-query";
 import { mutationOptions, useMutation } from "@tanstack/react-query";
 
 export const getLocationReviewsMutationKey = () =>
@@ -26,7 +30,7 @@ export async function getLocationReviews(
   data?: GetLocationReviewsMutationRequest,
   config: Partial<RequestConfig<GetLocationReviewsMutationRequest>> & {
     client?: typeof fetch;
-  } = {},
+  } = {}
 ) {
   const { client: request = fetch, ...requestConfig } = config;
 
@@ -50,7 +54,7 @@ export async function getLocationReviews(
 export function getLocationReviewsMutationOptions(
   config: Partial<RequestConfig<GetLocationReviewsMutationRequest>> & {
     client?: typeof fetch;
-  } = {},
+  } = {}
 ) {
   const mutationKey = getLocationReviewsMutationKey();
   return mutationOptions<
@@ -86,7 +90,7 @@ export function useGetLocationReviews<TContext>(
     client?: Partial<RequestConfig<GetLocationReviewsMutationRequest>> & {
       client?: typeof fetch;
     };
-  } = {},
+  } = {}
 ) {
   const { mutation = {}, client: config = {} } = options ?? {};
   const { client: queryClient, ...mutationOptions } = mutation;
@@ -98,9 +102,16 @@ export function useGetLocationReviews<TContext>(
       ...getLocationReviewsMutationOptions(config),
       mutationKey,
       ...mutationOptions,
-    } as unknown as UseMutationOptions,
-    queryClient,
-  ) as UseMutationOptions<
+    } as UseMutationOptions<
+      GetLocationReviewsMutationResponse,
+      ResponseErrorConfig<
+        GetLocationReviews400 | GetLocationReviews401 | GetLocationReviews500
+      >,
+      { data?: GetLocationReviewsMutationRequest },
+      TContext
+    >,
+    queryClient
+  ) as UseMutationResult<
     GetLocationReviewsMutationResponse,
     ResponseErrorConfig<
       GetLocationReviews400 | GetLocationReviews401 | GetLocationReviews500

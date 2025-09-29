@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Locations Page", () => {
   test("pagination beside filters - desktop", async ({ page }) => {

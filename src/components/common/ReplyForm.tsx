@@ -4,6 +4,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { REPLY_LIMITS } from "@/utils/constants";
+import { AISuggestionDisplay } from "./AISuggestionDisplay";
+import { useReplyModalAISuggestion } from "./ReplyModalLayout";
 
 const bulkReplySchema = z.object({
   text: z
@@ -24,8 +26,8 @@ interface ReplyFormProps {
   characterCount: number;
   isSubmitting: boolean;
   selectedCount: number;
-  aiSuggestion?: string;
-  onUseSuggestion?: (suggestion: string) => void;
+  getSuggestionPrompt?: () => string;
+  registerSubmit?: (submitFn: () => void) => void;
 }
 
 export const ReplyForm: React.FC<ReplyFormProps> = React.memo(
@@ -33,8 +35,8 @@ export const ReplyForm: React.FC<ReplyFormProps> = React.memo(
     onSubmit,
     onTextChange,
     characterCount,
-    aiSuggestion,
-    onUseSuggestion,
+    getSuggestionPrompt,
+    registerSubmit,
   }) => {
     const {
       register,
@@ -56,11 +58,11 @@ export const ReplyForm: React.FC<ReplyFormProps> = React.memo(
     }, [watchedText, onTextChange]);
 
     React.useEffect(() => {
-      if (aiSuggestion && onUseSuggestion) {
-        setValue("text", aiSuggestion);
-        onUseSuggestion(aiSuggestion);
+      if (registerSubmit) {
+        const submitFn = () => handleSubmit(onSubmit)();
+        registerSubmit(submitFn);
       }
-    }, [aiSuggestion, onUseSuggestion, setValue]);
+    }, [registerSubmit, handleSubmit, onSubmit]);
 
     const isOverLimit = characterCount > REPLY_LIMITS.MAX_LENGTH;
     const remainingChars = REPLY_LIMITS.MAX_LENGTH - characterCount;
@@ -70,6 +72,31 @@ export const ReplyForm: React.FC<ReplyFormProps> = React.memo(
         {/* Reply Text Section */}
         <Form.Group className="mb-4">
           <Form.Label className="fw-medium mb-3">Reply Text</Form.Label>
+          {/* AI Suggestion UI next to input */}
+          {(() => {
+            const ai = useReplyModalAISuggestion();
+            if (!ai) return null;
+            const prompt = getSuggestionPrompt
+              ? getSuggestionPrompt()
+              : watchedText;
+            const isDisabled = !prompt || !prompt.trim();
+            return (
+              <AISuggestionDisplay
+                suggestion={ai.aiSuggestion}
+                showSuggestion={ai.showSuggestion}
+                hasSuggestion={ai.hasSuggestion}
+                isLoading={ai.isLoading}
+                onGetSuggestion={() => ai.handleGetSuggestion(prompt)}
+                onUseSuggestion={() => {
+                  // Insert suggestion into textarea, then mark suggestion as used
+                  if (ai.aiSuggestion) setValue("text", ai.aiSuggestion);
+                  ai.handleUseSuggestion();
+                }}
+                disabled={isDisabled}
+                className="mb-2"
+              />
+            );
+          })()}
           <Form.Control
             as="textarea"
             rows={4}

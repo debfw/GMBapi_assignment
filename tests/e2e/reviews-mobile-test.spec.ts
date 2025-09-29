@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Reviews Page Mobile Responsiveness", () => {
   test("mobile layout - iPhone 14 Pro", async ({ page }) => {

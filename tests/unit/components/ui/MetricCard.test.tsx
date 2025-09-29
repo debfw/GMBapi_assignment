@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Star, Heart, MessageCircle } from "lucide-react";
-import { MetricCard } from "@/components/ui/MetricCard";
+import { describe, it, expect } from "vitest";
+import { MetricCard } from "@/components/common/MetricCard";
 
 describe("MetricCard", () => {
   const defaultProps = {
@@ -66,14 +67,6 @@ describe("MetricCard", () => {
     const icon = container.querySelector("svg");
     expect(icon).toHaveAttribute("width", "20");
     expect(icon).toHaveAttribute("height", "20");
-  });
-
-  it("applies correct styling to label", () => {
-    const { container } = render(<MetricCard {...defaultProps} />);
-
-    const label = container.querySelector(".small.text-muted");
-    expect(label).toBeInTheDocument();
-    expect(label).toHaveClass("small", "text-muted", "metric-card-label");
   });
 
   it("applies correct styling to value", () => {

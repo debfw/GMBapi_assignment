@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test } from "@playwright/test";
 
 test.describe("Layout Inspection", () => {
   test("inspect mobile layout structure", async ({ page }) => {

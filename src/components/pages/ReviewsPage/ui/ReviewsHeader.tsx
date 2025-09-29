@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Star, MessageSquare, Clock, ThumbsUp } from "lucide-react";
 import { COLORS } from "@/styles/design-system";
-import { useAccountKPIs } from "@/hooks/useAccountKPIs";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { MetricCard } from "@/components/common/MetricCard";
+import { useGetAccountKPIs } from "@/services";
 
 interface ReviewsHeaderProps {
   className?: string;
@@ -12,7 +12,7 @@ interface ReviewsHeaderProps {
 export const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
   className = "",
 }) => {
-  const { data: kpiData, isLoading, error } = useAccountKPIs();
+  const { data: kpiData, isLoading, error } = useGetAccountKPIs();
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
