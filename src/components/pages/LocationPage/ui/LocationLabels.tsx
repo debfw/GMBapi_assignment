@@ -54,12 +54,11 @@ export const LocationLabels: React.FC<LocationLabelsProps> = ({
               : "btn-outline-secondary"
           }`}
           onClick={() => onLabelSelect?.(label.id)}
-          style={{
-            backgroundColor:
-              selectedLabelId === label.id ? label.color : undefined,
-            borderColor: label.color,
-            color: selectedLabelId === label.id ? "white" : label.color,
-          }}
+          style={
+            selectedLabelId === label.id
+              ? { backgroundColor: label.color, borderColor: label.color }
+              : { borderColor: label.color, color: label.color }
+          }
         >
           <Tag size={14} className="me-1" />
           {label.name}

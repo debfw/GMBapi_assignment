@@ -1,5 +1,5 @@
 import React from "react";
-import { COLORS } from "@/styles/design-system";
+// import { COLORS } from "@/styles/design-system";
 import type { ReviewDomain, PaginationDomain } from "@/services/domain/types";
 import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
 import { ReviewList } from "./ReviewList";
@@ -68,20 +68,11 @@ export const ReviewsContent: React.FC<ReviewsContentProps> = React.memo(
 
     return (
       <div className="reviews-section">
-        <div
-          className="rounded-3 border-0 p-3 p-md-4"
-          style={{
-            backgroundColor: COLORS.white,
-            borderRadius: "12px",
-            border: "none",
-            boxShadow: "none",
-          }}
-        >
+        <div className="bg-white rounded-3 border-0 p-3 p-md-4">
           <div className="d-flex align-items-center justify-content-between mb-4 reviews-toolbar px-0">
             <div
               className="text-muted small filter-status"
               data-testid="filter-status"
-              style={{ marginLeft: 0 }}
             >
               {renderFilterStatus()}
             </div>

@@ -62,7 +62,7 @@ export const ReviewHeader: React.FC<ReviewHeaderProps> = React.memo(
         ) : (
           <div
             className="bg-secondary rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0 review-card-avatar"
-            style={{ width: "28px", height: "28px" }}
+            style={{ width: 28, height: 28 }}
           >
             <User size={12} className="text-white" data-testid="user-icon" />
           </div>

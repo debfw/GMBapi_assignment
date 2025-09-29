@@ -20,9 +20,13 @@ export interface ApiResponse<T = any> {
   headers: Record<string, string>;
 }
 
-const BASE_URL = import.meta.env.VITE_GMBAPI_BASE_URL;
+const BASE_URL = import.meta.env.VITE_GMBAPI_BASE_URL as string | undefined;
+const TOKEN = import.meta.env.VITE_GMBAPI_TOKEN as string | undefined;
 
-const defaultHeaders = {} as Record<string, string>;
+const defaultHeaders: Record<string, string> = {};
+if (TOKEN && TOKEN.trim().length > 0) {
+  defaultHeaders["Authorization"] = TOKEN;
+}
 
 async function client<T = any, E = any, B = any>(
   config: RequestConfig<B>
@@ -45,6 +49,11 @@ async function client<T = any, E = any, B = any>(
   }
 
   try {
+    if (!BASE_URL) {
+      throw new Error(
+        "Missing VITE_GMBAPI_BASE_URL. Define it in .env.local and restart the dev server."
+      );
+    }
     const response = await fetch(fullUrl, {
       method,
       headers: requestHeaders,
@@ -74,17 +83,11 @@ async function client<T = any, E = any, B = any>(
     }
 
     if (!response.ok) {
-      const error: ResponseErrorConfig<E> = {
-        status: response.status,
-        message:
-          (responseData &&
-          typeof responseData === "object" &&
-          "message" in responseData
-            ? (responseData as any).message
-            : undefined) || response.statusText,
-        data: responseData,
-      };
-      throw error;
+      throw normalizeError<E>(
+        response.status,
+        response.statusText,
+        responseData
+      );
     }
 
     return {
@@ -99,15 +102,37 @@ async function client<T = any, E = any, B = any>(
     }
 
     if (error && typeof error === "object" && "status" in error) {
-      throw error;
+      throw error as ResponseErrorConfig<E>;
     }
 
-    const networkError: ResponseErrorConfig<E> = {
-      status: 0,
-      message: error instanceof Error ? error.message : "Network error",
-    };
-    throw networkError;
+    throw normalizeError<E>(0, "Network error", undefined, error);
   }
 }
 
 export default client;
+
+export function normalizeError<E = any>(
+  status: number,
+  fallbackStatusText: string,
+  data?: unknown,
+  original?: unknown
+): ResponseErrorConfig<E> {
+  let message = fallbackStatusText || "Error";
+
+  if (data && typeof data === "object") {
+    const obj = data as Record<string, any>;
+    if (typeof obj.message === "string" && obj.message.trim().length > 0) {
+      message = obj.message;
+    }
+  }
+
+  if (!message && original instanceof Error) {
+    message = original.message;
+  }
+
+  return {
+    status,
+    message,
+    data: data as E,
+  };
+}

@@ -54,7 +54,7 @@ export const LocationProfilePage: React.FC = () => {
               <div className="text-center">
                 <h4 className="text-danger">Error Loading Location Profile</h4>
                 <p className="text-muted">
-                  {error && typeof error === "object" && "message" in error
+                  {error && typeof (error as any)?.message === "string"
                     ? (error as any).message
                     : "An error occurred while loading the location profile"}
                 </p>

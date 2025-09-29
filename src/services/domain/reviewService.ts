@@ -71,10 +71,11 @@ const transformSuggestionRequest = (
 
 const createApiError = (error: unknown): ApiError => {
   if (error && typeof error === "object" && "status" in error) {
+    const err = error as { status: number; message?: string; code?: string };
     return {
-      message: (error as any).message || "An error occurred",
-      status: (error as any).status,
-      code: (error as any).code,
+      message: err.message || "An error occurred",
+      status: err.status,
+      code: err.code,
     };
   }
 
@@ -205,7 +206,7 @@ export class ReviewService {
 
   isRateLimited(error: unknown): boolean {
     if (error && typeof error === "object" && "status" in error) {
-      return (error as any).status === 429;
+      return (error as { status: number }).status === 429;
     }
     return false;
   }

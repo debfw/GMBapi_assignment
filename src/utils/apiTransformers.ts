@@ -3,8 +3,8 @@ import { z } from "zod";
 
 export interface RawReview {
   account_id: string;
-  comment_en: string | null;
-  comment_native: string | null;
+  comment_en: string | null | undefined;
+  comment_native: string | null | undefined;
   created_date: number;
   has_comment: number;
   is_deleted: number;
@@ -12,7 +12,7 @@ export interface RawReview {
   profilePhotoUrl: string | null;
   rating: number;
   reply: number;
-  reply_comment: string | null;
+  reply_comment: string | null | undefined;
   reply_date: number | null;
   response_time: number | null;
   review_name: string;
@@ -22,18 +22,18 @@ export interface RawReview {
 
 export const rawReviewSchema = z.object({
   account_id: z.string(),
-  comment_en: z.string().nullable().catch(""),
-  comment_native: z.string().nullable().catch(""),
+  comment_en: z.string().nullish().catch(""),
+  comment_native: z.string().nullish().catch(""),
   created_date: z.number(),
-  has_comment: z.number(),
-  is_deleted: z.number(),
+  has_comment: z.number().catch(0),
+  is_deleted: z.number().catch(0),
   location_id: z.string(),
-  profilePhotoUrl: z.string().nullable(),
+  profilePhotoUrl: z.string().nullish(),
   rating: z.number(),
-  reply: z.number(),
-  reply_comment: z.string().nullable().catch(""),
-  reply_date: z.number().nullable(),
-  response_time: z.number().nullable(),
+  reply: z.number().catch(0),
+  reply_comment: z.string().nullish().catch(""),
+  reply_date: z.number().nullish(),
+  response_time: z.number().nullish(),
   review_name: z.string(),
   reviewerName: z.string(),
   update_date: z.number(),
@@ -51,7 +51,9 @@ export const rawReviewListResponseSchema = z.object({
 
 export type RawReviewListResponse = z.infer<typeof rawReviewListResponseSchema>;
 
-export function transformRawReview(rawReview: RawReview): Review {
+export function transformRawReview(
+  rawReview: z.infer<typeof rawReviewSchema>
+): Review {
   const formatTimestamp = (timestamp: number): string => {
     const convertedMicroseconds = timestamp / 1000000;
     const convertedSeconds = timestamp / 1000000000;

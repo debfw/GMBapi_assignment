@@ -8,29 +8,49 @@ import "./index.css";
 
 function App() {
   return (
-    <ErrorBoundary
-      disableRetry={false}
-      retryDisabledMessage="Retry functionality has been disabled. Please contact support for assistance."
+    <Router
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
     >
-      <Router
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true,
-        }}
-      >
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<ReviewsPage />} />
-            <Route path="/reviews" element={<ReviewsPage />} />
-            <Route path="/locations" element={<LocationsPage />} />
-            <Route
-              path="/locations/:locationId"
-              element={<LocationProfilePage />}
-            />
-          </Routes>
-        </div>
-      </Router>
-    </ErrorBoundary>
+      <div className="App">
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <ErrorBoundary>
+                <ReviewsPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/reviews"
+            element={
+              <ErrorBoundary>
+                <ReviewsPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/locations"
+            element={
+              <ErrorBoundary>
+                <LocationsPage />
+              </ErrorBoundary>
+            }
+          />
+          <Route
+            path="/locations/:locationId"
+            element={
+              <ErrorBoundary>
+                <LocationProfilePage />
+              </ErrorBoundary>
+            }
+          />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 

@@ -90,36 +90,16 @@ export const ReviewsPage: React.FC = () => {
 
   const reviews = data?.reviews || [];
 
-  const filteredReviews = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) return reviews;
-    return reviews.filter((review: ReviewDomain) => {
-      return (
-        review.comment?.toLowerCase().includes(term) ||
-        review.customerName?.toLowerCase().includes(term) ||
-        review.businessReply?.text?.toLowerCase().includes(term)
-      );
-    });
-  }, [reviews, searchTerm]);
+  const filteredReviews = reviews;
 
-  // Use original pagination when not searching, otherwise create custom pagination for filtered results
-  const pagination = searchTerm.trim()
-    ? {
-        page: 1,
-        limit: filteredReviews.length,
-        total: filteredReviews.length,
-        totalPages: 1,
-        hasNext: false,
-        hasPrev: false,
-      }
-    : data?.pagination || {
-        page: 1,
-        limit: 20,
-        total: 0,
-        totalPages: 0,
-        hasNext: false,
-        hasPrev: false,
-      };
+  const pagination = data?.pagination || {
+    page: 1,
+    limit: 20,
+    total: 0,
+    totalPages: 0,
+    hasNext: false,
+    hasPrev: false,
+  };
 
   return (
     <ResponsiveLayout activeSection="reviews">
@@ -162,7 +142,7 @@ export const ReviewsPage: React.FC = () => {
             filterState={filterState}
             onReply={handleReplyClick}
             onPageChange={handlePageChange}
-            isSearching={!!searchTerm.trim()}
+            isSearching={false}
           />
         </div>
       </div>

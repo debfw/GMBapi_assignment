@@ -63,13 +63,7 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
         title={<>Bulk Reply to Reviews</>}
         warningNode={
           showApiWarning ? (
-            <div
-              className="mb-4 p-3 rounded-3"
-              style={{
-                backgroundColor: "#fef3cd",
-                border: "1px solid #fecaca",
-              }}
-            >
+            <div className="alert alert-warning mb-4" role="alert">
               <strong>Preview only:</strong> Replies are not sent yet. Your text
               will be applied to <strong>{selectedReviews.size}</strong>{" "}
               selected reviews.

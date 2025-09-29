@@ -115,7 +115,7 @@ export const LocationsPage: React.FC = () => {
               >
                 <div
                   className="position-relative flex-grow-1"
-                  style={{ maxWidth: isMobile ? "100%" : "300px" }}
+                  style={{ maxWidth: isMobile ? "100%" : 300 }}
                 >
                   <Search
                     size={16}
@@ -189,7 +189,7 @@ export const LocationsPage: React.FC = () => {
                                 </div>
                                 <div
                                   className="bg-success rounded-circle"
-                                  style={{ width: "8px", height: "8px" }}
+                                  style={{ width: 8, height: 8 }}
                                 ></div>
                               </div>
 
@@ -210,7 +210,7 @@ export const LocationsPage: React.FC = () => {
                                   </span>
                                   <div
                                     className="progress"
-                                    style={{ width: "80px", height: "6px" }}
+                                    style={{ width: 80, height: 6 }}
                                   >
                                     <div
                                       className={`progress-bar bg-${getHealthColor(location.health)}`}
@@ -287,7 +287,7 @@ export const LocationsPage: React.FC = () => {
                                     </span>
                                     <div
                                       className="bg-success rounded-circle"
-                                      style={{ width: "8px", height: "8px" }}
+                                      style={{ width: 8, height: 8 }}
                                     ></div>
                                   </div>
                                 </td>
@@ -300,7 +300,7 @@ export const LocationsPage: React.FC = () => {
                                     </span>
                                     <div
                                       className="progress flex-grow-1 me-2"
-                                      style={{ height: "6px" }}
+                                      style={{ height: 6 }}
                                     >
                                       <div
                                         className={`progress-bar bg-${getHealthColor(location.health)}`}
@@ -336,7 +336,7 @@ export const LocationsPage: React.FC = () => {
                       </span>
                       {getHealthIcon(overallHealth)}
                     </div>
-                    <div className="progress" style={{ height: "8px" }}>
+                    <div className="progress" style={{ height: 8 }}>
                       <div
                         className={`progress-bar bg-${getHealthColor(overallHealth)}`}
                         style={{ width: `${overallHealth}%` }}

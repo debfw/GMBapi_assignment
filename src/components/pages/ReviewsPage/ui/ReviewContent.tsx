@@ -24,10 +24,7 @@ export const ReviewContent: React.FC<ReviewContentProps> = React.memo(
         <div className="mb-2">
           <div className="review-card-column-title">
             Review{" "}
-            <span
-              className="text-muted"
-              style={{ fontSize: "0.6rem", textTransform: "capitalize" }}
-            >
+            <span className="text-muted text-capitalize">
               ({formatDate(review.date)})
             </span>
           </div>
