@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { reviewService } from "@/services/domain/reviewService";
 import type {
@@ -88,57 +88,22 @@ export const useReviewFilters = () => {
   };
 };
 
-export const useReviews = () => {
-  const [isApiDisabled, setIsApiDisabled] = useState(false);
-  const [lastApiCall, setLastApiCall] = useState<number>(0);
-  const API_COOLDOWN = 1000;
-
+export const useReviewsQuery = (filters: ReviewFiltersDomain) => {
   const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: (filters: ReviewFiltersDomain) =>
-      reviewService.getReviews(filters),
-    onError: (error) => {
-      if (reviewService.isRateLimited(error)) {
-        setIsApiDisabled(true);
-        setTimeout(() => {
-          setIsApiDisabled(false);
-        }, reviewService.getCooldownTime());
+  return useQuery({
+    queryKey: REVIEW_QUERY_KEYS.reviews(filters),
+    queryFn: async () => {
+      const result = await reviewService.getReviews(filters);
+      if (!result.success) {
+        throw result.error;
       }
+      return result.data;
     },
-    onSuccess: (result, variables) => {
-      if (result.success) {
-        // Cache the result
-        queryClient.setQueryData(
-          REVIEW_QUERY_KEYS.reviews(variables),
-          result.data
-        );
-      }
-    },
+    placeholderData: () =>
+      queryClient.getQueryData(REVIEW_QUERY_KEYS.reviews(filters)),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
-
-  const fetchReviews = useCallback(
-    (filters: ReviewFiltersDomain) => {
-      if (isApiDisabled) return;
-
-      const now = Date.now();
-      const timeSinceLastCall = now - lastApiCall;
-
-      if (timeSinceLastCall >= API_COOLDOWN || lastApiCall === 0) {
-        setLastApiCall(now);
-        mutation.mutate(filters);
-      }
-    },
-    [isApiDisabled, lastApiCall, mutation]
-  );
-
-  return {
-    ...mutation,
-    fetchReviews,
-    isApiDisabled,
-    data: mutation.data?.success ? mutation.data.data : undefined,
-    error: mutation.data?.success ? undefined : mutation.data?.error,
-  };
 };
 
 export const useReviewReply = () => {
@@ -149,9 +114,7 @@ export const useReviewReply = () => {
       reviewService.replyToReview(reply),
     onSuccess: (result, variables) => {
       if (result.success) {
-        // Invalidate and refetch reviews
         queryClient.invalidateQueries({ queryKey: ["reviews"] });
-        // Update specific review cache
         queryClient.setQueryData(
           REVIEW_QUERY_KEYS.review(variables.reviewId),
           (old: any) => ({

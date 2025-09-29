@@ -22,9 +22,7 @@ export interface ApiResponse<T = any> {
 
 const BASE_URL = import.meta.env.VITE_GMBAPI_BASE_URL;
 
-const defaultHeaders = {
-  Authorization: import.meta.env.VITE_GMBAPI_TOKEN,
-} as Record<string, string>;
+const defaultHeaders = {} as Record<string, string>;
 
 async function client<T = any, E = any, B = any>(
   config: RequestConfig<B>
@@ -55,14 +53,23 @@ async function client<T = any, E = any, B = any>(
     });
 
     let responseData: any = null;
-    const hasBody =
-      response.status !== 204 && response.headers.get("content-length") !== "0";
+    const contentType = response.headers.get("content-type") || "";
+    const hasBody = response.status !== 204;
     if (hasBody) {
-      const text = await response.text();
-      try {
+      if (contentType.includes("application/json")) {
+        const text = await response.text();
         responseData = text ? JSON.parse(text) : null;
-      } catch (_e) {
-        responseData = text;
+      } else if (contentType.includes("text/")) {
+        responseData = await response.text();
+      } else if (contentType.includes("application/octet-stream")) {
+        responseData = await response.arrayBuffer();
+      } else {
+        try {
+          const text = await response.text();
+          responseData = text;
+        } catch (_e) {
+          responseData = null;
+        }
       }
     }
 

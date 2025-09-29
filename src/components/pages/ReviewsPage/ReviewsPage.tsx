@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
 import { SingleReviewReplyModal } from "./ui/SingleReviewReplyModal";
 import { BulkReplyModal } from "./ui/BulkReplyModal";
@@ -9,9 +9,8 @@ import { useModalContext } from "@/stores/ModalContext";
 import { ReviewsHeader } from "./ui/ReviewsHeader";
 import { ReviewsFilters } from "./ui/ReviewsFilters";
 import { useReviewsFilters } from "./hooks/useReviewsFilters";
-import { useReviews } from "./hooks/useReviewService";
-import type { Review } from "@/services";
-// Removed unused API Review type; using domain types throughout
+import { useReviewsQuery } from "./hooks/useReviewService";
+import { useDebounce } from "@/hooks";
 
 export const ReviewsPage: React.FC = () => {
   const [selectedReview, setSelectedReview] = useState<{
@@ -39,22 +38,22 @@ export const ReviewsPage: React.FC = () => {
     setFilters,
   } = useReviewsFilters();
 
-  const { mutate, data, error, isPending } = useReviews();
+  const domainFilters: ReviewFiltersDomain = useMemo(() => {
+    return {
+      page: filters.page ?? 1,
+      per_page: filters.per_page ?? 20,
+      is_deleted: filters.is_deleted ?? false,
+      ...(filters.star_rating !== undefined
+        ? { star_rating: filters.star_rating }
+        : {}),
+      ...(filters.has_reply !== undefined
+        ? { has_reply: filters.has_reply }
+        : {}),
+    };
+  }, [filters]);
 
-  const toDomainFilters = useCallback(
-    (f: any): ReviewFiltersDomain => ({
-      page: f.page ?? 1,
-      per_page: f.per_page ?? 20,
-      is_deleted: f.is_deleted ?? false,
-      star_rating: f.star_rating,
-      has_reply: f.has_reply,
-    }),
-    []
-  );
-
-  useEffect(() => {
-    mutate(toDomainFilters(filters));
-  }, [filters, mutate, toDomainFilters]);
+  const debouncedFilters = useDebounce<ReviewFiltersDomain>(domainFilters, 300);
+  const { data, error, isLoading, refetch } = useReviewsQuery(debouncedFilters);
 
   const handleReplyClick = useCallback((review: ReviewDomain) => {
     setSelectedReview({
@@ -71,16 +70,16 @@ export const ReviewsPage: React.FC = () => {
   }, [closeReply]);
 
   const handleRefreshReviews = useCallback(() => {
-    mutate(toDomainFilters(filters));
-  }, [mutate, filters, toDomainFilters]);
+    refetch();
+  }, [refetch]);
 
   const handleReplySuccess = useCallback(() => {
-    mutate(toDomainFilters(filters));
-  }, [mutate, filters, toDomainFilters]);
+    refetch();
+  }, [refetch]);
 
   const handleBulkReplySuccess = useCallback(() => {
-    mutate(toDomainFilters(filters));
-  }, [mutate, filters, toDomainFilters]);
+    refetch();
+  }, [refetch]);
 
   const handlePageChange = useCallback(
     (page: number) => {
@@ -91,16 +90,17 @@ export const ReviewsPage: React.FC = () => {
 
   const reviews = data?.reviews || [];
 
-  const filteredReviews = searchTerm.trim()
-    ? reviews.filter((review: ReviewDomain) => {
-        const searchLower = searchTerm.toLowerCase();
-        return (
-          review.comment?.toLowerCase().includes(searchLower) ||
-          review.customerName?.toLowerCase().includes(searchLower) ||
-          review.businessReply?.text?.toLowerCase().includes(searchLower)
-        );
-      })
-    : reviews;
+  const filteredReviews = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return reviews;
+    return reviews.filter((review: ReviewDomain) => {
+      return (
+        review.comment?.toLowerCase().includes(term) ||
+        review.customerName?.toLowerCase().includes(term) ||
+        review.businessReply?.text?.toLowerCase().includes(term)
+      );
+    });
+  }, [reviews, searchTerm]);
 
   // Use original pagination when not searching, otherwise create custom pagination for filtered results
   const pagination = searchTerm.trim()
@@ -129,16 +129,7 @@ export const ReviewsPage: React.FC = () => {
           <div className="content-section">
             <ReviewsHeader />
             {error && (
-              <div
-                style={{
-                  backgroundColor: "#fef3cd",
-                  border: "1px solid #fecaca",
-                  borderRadius: "8px",
-                  padding: "12px",
-                  margin: "16px 0",
-                  color: "#92400e",
-                }}
-              >
+              <div className="alert alert-warning mt-3" role="alert">
                 🚨 API Error: {(error as any)?.message || "An error occurred"}
               </div>
             )}
@@ -162,7 +153,7 @@ export const ReviewsPage: React.FC = () => {
           <ReviewsContent
             reviews={filteredReviews}
             pagination={pagination}
-            loading={isPending}
+            loading={isLoading}
             error={
               error && !data
                 ? (error as any)?.message || "An error occurred"

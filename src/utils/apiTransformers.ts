@@ -1,9 +1,10 @@
 import type { Review } from "@/services/types";
+import { z } from "zod";
 
 export interface RawReview {
   account_id: string;
-  comment_en: string;
-  comment_native: string;
+  comment_en: string | null;
+  comment_native: string | null;
   created_date: number;
   has_comment: number;
   is_deleted: number;
@@ -11,7 +12,7 @@ export interface RawReview {
   profilePhotoUrl: string | null;
   rating: number;
   reply: number;
-  reply_comment: string;
+  reply_comment: string | null;
   reply_date: number | null;
   response_time: number | null;
   review_name: string;
@@ -19,15 +20,36 @@ export interface RawReview {
   update_date: number;
 }
 
-export interface RawReviewListResponse {
-  metadata: {
-    pages: number;
-    results_per_page: number;
-    current_page: number;
-    results: number;
-  };
-  data: RawReview[];
-}
+export const rawReviewSchema = z.object({
+  account_id: z.string(),
+  comment_en: z.string().nullable().catch(""),
+  comment_native: z.string().nullable().catch(""),
+  created_date: z.number(),
+  has_comment: z.number(),
+  is_deleted: z.number(),
+  location_id: z.string(),
+  profilePhotoUrl: z.string().nullable(),
+  rating: z.number(),
+  reply: z.number(),
+  reply_comment: z.string().nullable().catch(""),
+  reply_date: z.number().nullable(),
+  response_time: z.number().nullable(),
+  review_name: z.string(),
+  reviewerName: z.string(),
+  update_date: z.number(),
+});
+
+export const rawReviewListResponseSchema = z.object({
+  metadata: z.object({
+    pages: z.number(),
+    results_per_page: z.number(),
+    current_page: z.number(),
+    results: z.number(),
+  }),
+  data: z.array(rawReviewSchema),
+});
+
+export type RawReviewListResponse = z.infer<typeof rawReviewListResponseSchema>;
 
 export function transformRawReview(rawReview: RawReview): Review {
   const formatTimestamp = (timestamp: number): string => {
@@ -40,7 +62,6 @@ export function transformRawReview(rawReview: RawReview): Review {
     const dateSeconds = new Date(convertedSeconds);
     const dateNanoseconds = new Date(convertedNanoseconds);
     const dateDirect = new Date(directMilliseconds);
-
 
     let result;
     if (dateDirect.getFullYear() > 2000 && dateDirect.getFullYear() < 2030) {
@@ -59,7 +80,6 @@ export function transformRawReview(rawReview: RawReview): Review {
       result = dateSeconds.toISOString();
     }
 
-
     return result;
   };
 
@@ -77,7 +97,7 @@ export function transformRawReview(rawReview: RawReview): Review {
     customerName: rawReview.reviewerName,
     customerPhoto: rawReview.profilePhotoUrl || undefined,
     rating: rawReview.rating,
-    comment: rawReview.comment_en || rawReview.comment_native,
+    comment: (rawReview as any).comment_en || (rawReview as any).comment_native,
     date: formatTimestamp(rawReview.created_date),
     locationId: rawReview.location_id,
     locationName: `Location ${rawReview.location_id}`,
@@ -98,9 +118,8 @@ export function transformRawReview(rawReview: RawReview): Review {
   };
 }
 
-export function transformReviewListResponse(
-  rawResponse: RawReviewListResponse
-) {
+export function transformReviewListResponse(raw: unknown) {
+  const rawResponse = rawReviewListResponseSchema.parse(raw);
   const reviews = rawResponse.data.map(transformRawReview);
 
   const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);

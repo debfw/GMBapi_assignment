@@ -168,27 +168,31 @@ export class ReviewService {
     };
 
     try {
-      for (const reviewId of request.reviewIds) {
+      const concurrency = 3;
+      const queue = [...request.reviewIds];
+      const runNext = async (): Promise<void> => {
+        const reviewId = queue.shift();
+        if (!reviewId) return;
         progress.currentReview = reviewId;
         onProgress?.(progress);
-
         const replyResult = await this.replyToReview({
           reviewId,
           text: request.text,
           isPublic: request.isPublic,
         });
-
         if (!replyResult.success) {
-          // Continue with other reviews even if one fails
-          console.warn(
-            `Failed to reply to review ${reviewId}:`,
-            replyResult.error
-          );
+          if (this.isRateLimited(replyResult.error)) {
+            await new Promise((r) => setTimeout(r, this.getCooldownTime()));
+          }
         }
-
         progress.completed++;
         onProgress?.(progress);
-      }
+        return runNext();
+      };
+
+      await Promise.all(
+        Array.from({ length: Math.min(concurrency, queue.length) }, runNext)
+      );
 
       return { success: true, data: undefined };
     } catch (error) {
