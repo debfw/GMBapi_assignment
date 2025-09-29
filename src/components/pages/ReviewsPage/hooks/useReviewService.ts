@@ -1,103 +1,64 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { reviewService } from "@/services/domain/reviewService";
+import { getReviews as getReviewsClient } from "@/services/hooks/useGetReviews";
+import { replyToReview as replyToReviewClient } from "@/services/hooks/useReplyToReview";
+import { transformReviewListResponse } from "@/utils/apiTransformers";
+import type { ReviewListResponseDomain } from "@/services/domain/types";
 import type {
   ReviewFiltersDomain,
   ReviewReplyDomain,
-  ReviewSuggestionDomain,
-  BulkReplyRequest,
-  BulkReplyProgress,
   FilterState,
 } from "@/services/domain/types";
-import { PAGINATION } from "@/utils/constants";
 
 export const REVIEW_QUERY_KEYS = {
   reviews: (filters: ReviewFiltersDomain) => ["reviews", filters] as const,
   review: (id: string) => ["review", id] as const,
 } as const;
 
-export const useReviewFilters = () => {
-  const [filterState, setFilterState] = useState<FilterState>({
-    searchTerm: "",
-    selectedStarRating: "",
-    replyStatus: "",
-  });
-
-  const [filters, setFilters] = useState<ReviewFiltersDomain>({
-    page: PAGINATION.DEFAULT_PAGE,
-    per_page: PAGINATION.DEFAULT_LIMIT,
-    is_deleted: false,
-  });
-
-  const handleStarRatingChange = useCallback((value: string) => {
-    const rating = value === "" ? "" : parseInt(value);
-    setFilterState((prev) => ({ ...prev, selectedStarRating: rating }));
-
-    setFilters((prev) => {
-      const newFilters = { ...prev, page: 1 };
-      if (rating === "") {
-        delete newFilters.star_rating;
-      } else {
-        newFilters.star_rating = rating;
-      }
-      return newFilters;
-    });
-  }, []);
-
-  const handleReplyStatusChange = useCallback((value: string) => {
-    setFilterState((prev) => ({ ...prev, replyStatus: value }));
-
-    setFilters((prev) => {
-      const newFilters = { ...prev, page: 1 };
-      if (value === "replied") {
-        newFilters.has_reply = true;
-      } else if (value === "unreplied") {
-        newFilters.has_reply = false;
-      } else {
-        delete newFilters.has_reply;
-      }
-      return newFilters;
-    });
-  }, []);
-
-  const handleClearFilters = useCallback(() => {
-    setFilterState({
-      searchTerm: "",
-      selectedStarRating: "",
-      replyStatus: "",
-    });
-    setFilters({
-      page: PAGINATION.DEFAULT_PAGE,
-      per_page: PAGINATION.DEFAULT_LIMIT,
-      is_deleted: false,
-    });
-  }, []);
-
-  const handlePageChange = useCallback((page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-  }, []);
-
-  return {
-    filters,
-    filterState,
-    setFilters,
-    handleStarRatingChange,
-    handleReplyStatusChange,
-    handleClearFilters,
-    handlePageChange,
-  };
-};
-
 export const useReviewsQuery = (filters: ReviewFiltersDomain) => {
   const queryClient = useQueryClient();
   return useQuery({
     queryKey: REVIEW_QUERY_KEYS.reviews(filters),
     queryFn: async () => {
-      const result = await reviewService.getReviews(filters);
-      if (!result.success) {
-        throw result.error;
-      }
-      return result.data;
+      const apiFilters = {
+        page: filters.page,
+        per_page: filters.per_page,
+        is_deleted: filters.is_deleted ?? false,
+        ...(filters.star_rating !== undefined
+          ? { star_rating: filters.star_rating }
+          : {}),
+        ...(filters.has_reply !== undefined
+          ? { has_reply: filters.has_reply }
+          : {}),
+      } as const;
+
+      const raw = await getReviewsClient(apiFilters);
+      const transformed = transformReviewListResponse(raw as unknown);
+
+      const data: ReviewListResponseDomain = {
+        reviews: transformed.reviews.map((r: any) => ({
+          id: r.id,
+          customerName: r.customerName,
+          customerPhoto: r.customerPhoto,
+          comment: r.comment,
+          rating: r.rating,
+          date: r.date,
+          status: r.status,
+          locationName: r.locationName,
+          helpfulVotes: r.helpfulVotes,
+          businessReply: r.businessReply
+            ? {
+                text: r.businessReply.text,
+                date: r.businessReply.date,
+                isPublic: r.businessReply.isPublic,
+              }
+            : undefined,
+        })),
+        pagination: transformed.pagination,
+        summary: transformed.summary,
+      };
+
+      return data;
     },
     placeholderData: () =>
       queryClient.getQueryData(REVIEW_QUERY_KEYS.reviews(filters)),
@@ -110,10 +71,15 @@ export const useReviewReply = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (reply: ReviewReplyDomain) =>
-      reviewService.replyToReview(reply),
+    mutationFn: async (reply: ReviewReplyDomain) => {
+      await replyToReviewClient(reply.reviewId, {
+        text: reply.text,
+        isPublic: reply.isPublic,
+      });
+      return { success: true as const };
+    },
     onSuccess: (result, variables) => {
-      if (result.success) {
+      if ((result as any).success) {
         queryClient.invalidateQueries({ queryKey: ["reviews"] });
         queryClient.setQueryData(
           REVIEW_QUERY_KEYS.review(variables.reviewId),
@@ -125,72 +91,4 @@ export const useReviewReply = () => {
       }
     },
   });
-};
-
-export const useReviewSuggestion = () => {
-  return useMutation({
-    mutationFn: (request: ReviewSuggestionDomain) =>
-      reviewService.getReviewSuggestion(request),
-  });
-};
-
-export const useBulkReply = () => {
-  const [progress, setProgress] = useState<BulkReplyProgress>({
-    completed: 0,
-    total: 0,
-    currentReview: null,
-  });
-
-  const queryClient = useQueryClient();
-
-  const mutation = useMutation({
-    mutationFn: (request: BulkReplyRequest) =>
-      reviewService.processBulkReplies(request, setProgress),
-    onSuccess: (result) => {
-      if (result.success) {
-        queryClient.invalidateQueries({ queryKey: ["reviews"] });
-        setProgress({ completed: 0, total: 0, currentReview: null });
-      }
-    },
-    onError: () => {
-      setProgress({ completed: 0, total: 0, currentReview: null });
-    },
-  });
-
-  return {
-    ...mutation,
-    progress,
-    resetProgress: () =>
-      setProgress({ completed: 0, total: 0, currentReview: null }),
-  };
-};
-
-export const useApiRateLimit = () => {
-  const [isDisabled, setIsDisabled] = useState(false);
-  const [lastError, setLastError] = useState<Date | null>(null);
-
-  const handleError = useCallback((error: unknown) => {
-    if (reviewService.isRateLimited(error)) {
-      setIsDisabled(true);
-      setLastError(new Date());
-
-      setTimeout(() => {
-        setIsDisabled(false);
-        setLastError(null);
-      }, reviewService.getCooldownTime());
-    }
-  }, []);
-
-  const getRemainingCooldown = useCallback(() => {
-    if (!lastError) return 0;
-    const elapsed = Date.now() - lastError.getTime();
-    return Math.max(0, reviewService.getCooldownTime() - elapsed);
-  }, [lastError]);
-
-  return {
-    isDisabled,
-    lastError,
-    handleError,
-    getRemainingCooldown,
-  };
 };
