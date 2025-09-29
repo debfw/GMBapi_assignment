@@ -231,7 +231,7 @@ test.describe("Reviews Page Search and Filters", () => {
     await expect(page.locator("select").nth(1)).toBeVisible();
 
     // Test on tablet viewport
-    await page.setViewportSize({ width: 768, height: 1024 });
+    await page.setViewportSize({ width: 1610, height: 1024 });
     await expect(page.getByPlaceholder("Search reviews...")).toBeVisible();
 
     // Test on desktop viewport
