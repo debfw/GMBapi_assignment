@@ -1,7 +1,7 @@
 import React from "react";
 import { Container, Alert, Row, Col } from "react-bootstrap";
-import { ReviewCard } from "@/components/pages/ReviewsPage/ReviewCard";
-import { ReviewPagination } from "./ReviewPagination";
+import { ReviewCard } from "./ReviewCard";
+import { ReviewPagination } from "@/components/common";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import { useStableCallback } from "@/utils/memoization";
 import type { Review, Pagination as PaginationType } from "@/services/types";

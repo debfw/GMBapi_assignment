@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { useLocationReviews } from "@/hooks";
 import { ReviewList, ReviewsFilters } from "@/components/common";
+import type { FilterState } from "@/hooks/useReviewsFilters";
+import type { Review } from "@/services/types";
 import type { ReviewListResponse } from "@/services/types/ReviewListResponse";
 
 interface LocationReviewsProps {
@@ -43,9 +45,9 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
     getLocationReviews(newFilters);
   };
 
-  const handleReply = (reviewId: string) => {
+  const handleReply = (review: Review) => {
     // Handle reply functionality for location reviews
-    console.log("Reply to review:", reviewId);
+    console.log("Reply to review:", review.id);
   };
 
   const typedData = data as ReviewListResponse | null;
@@ -53,11 +55,10 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
   const pagination = typedData?.pagination;
 
   // Convert location filters to the format expected by ReviewsFilters
-  const filterState = {
-    star_rating: filters.star_rating?.toString() || "",
-    has_reply: "", // Location reviews don't have reply status filter
-    page: filters.page,
-    per_page: filters.per_page,
+  const filterState: FilterState = {
+    searchTerm: "",
+    selectedStarRating: filters.star_rating ?? "",
+    replyStatus: "",
   };
 
   return (
@@ -66,7 +67,7 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
         <div className="mb-4">
           <ReviewsFilters
             filterState={filterState}
-            onStarRatingChange={(value) =>
+            onStarRatingChange={(value: string) =>
               handleFilterChange(
                 "star_rating",
                 value ? parseInt(value) : undefined
@@ -86,8 +87,6 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
             }}
             onReplyStatusChange={() => {}} // Not applicable for location reviews
             onBulkReply={() => {}} // Not applicable for location reviews
-            onExportReviews={() => {}} // Not applicable for location reviews
-            onImportReviews={() => {}} // Not applicable for location reviews
             onRefreshReviews={handleSearch}
           />
         </div>
@@ -97,7 +96,7 @@ export const LocationReviews: React.FC<LocationReviewsProps> = ({
         reviews={reviews}
         pagination={pagination}
         loading={isLoading as boolean}
-        error={error?.message}
+        error={(error as { message?: string } | undefined)?.message}
         onReply={handleReply}
         onPageChange={handlePageChange}
         filterState={filterState}

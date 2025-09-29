@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Modal, Form, Button, Alert } from "react-bootstrap";
+import { Form, Button, Alert } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -9,6 +9,7 @@ import { useMutation } from "@tanstack/react-query";
 import { replyToReviewMutationOptions } from "@/services/hooks/useReplyToReview";
 import { useAISuggestion } from "@/hooks/useAISuggestion";
 import { AISuggestionDisplay } from "@/components/common/AISuggestionDisplay";
+import { ReplyModalLayout } from "@/components/common/ReplyModalLayout";
 
 const replySchema = z.object({
   text: z
@@ -131,96 +132,24 @@ export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
   };
 
   return (
-    <Modal
+    <ReplyModalLayout
       show={show}
-      onHide={handleClose}
+      onClose={handleClose}
       size="lg"
-      centered
       className="review-reply-modal"
-    >
-      <Modal.Header closeButton className="border-0 pb-4">
-        <Modal.Title className="d-flex align-items-center fw-semibold">
-          <MessageCircle size={20} className="me-3 text-primary" />
-          Reply to Review
-        </Modal.Title>
-      </Modal.Header>
-
-      <Modal.Body className="px-4 pb-4">
-        <div className="mb-3">
-          <h6 className="text-muted mb-3 fw-medium">
-            Original Review by {customerName}:
-          </h6>
-          <div className="p-4 rounded-3 review-reply-original">
-            <p className="mb-0 text-dark">{reviewText}</p>
-          </div>
-        </div>
-
-        {showApiWarning && (
+      icon={<MessageCircle size={20} className="me-3 text-primary" />}
+      title={<>Reply to Review</>}
+      warningNode={
+        showApiWarning ? (
           <Alert variant="warning" className="mb-4 review-reply-alert">
             <strong>API Under Development:</strong> The reply functionality is
             currently under development and not yet available. Please check back
             later.
           </Alert>
-        )}
-
-        <AISuggestionDisplay
-          suggestion={aiSuggestion}
-          showSuggestion={showSuggestion}
-          hasSuggestion={hasSuggestion}
-          isLoading={isSuggestionLoading}
-          onGetSuggestion={handleGetSuggestion}
-          onUseSuggestion={handleUseSuggestion}
-          disabled={isTyping || !reviewText.trim()}
-          className="mb-4"
-        />
-
-        <Form onSubmit={handleSubmit(handleFormSubmit)}>
-          <Form.Group className="mb-4">
-            <Form.Label className="fw-medium mb-3">Reply Text</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={4}
-              placeholder="Write a professional and helpful reply..."
-              {...register("text")}
-              onChange={handleTextChange}
-              isInvalid={!!errors.text}
-              className="bulk-reply-textarea"
-            />
-            <Form.Control.Feedback type="invalid" className="mt-2">
-              {errors.text?.message}
-            </Form.Control.Feedback>
-            <div className="d-flex justify-content-between mt-3">
-              <Form.Text
-                className={isOverLimit ? "text-danger" : "text-muted small"}
-              >
-                {characterCount} / {REPLY_LIMITS.MAX_LENGTH} characters
-                {isOverLimit && " (over limit)"}
-              </Form.Text>
-              {remainingChars < 50 && remainingChars > 0 && (
-                <Form.Text className="text-warning small">
-                  {remainingChars} characters remaining
-                </Form.Text>
-              )}
-            </div>
-          </Form.Group>
-
-          <Form.Group className="mb-4">
-            <Form.Check
-              type="checkbox"
-              label="Make this reply public (visible to customers)"
-              {...register("isPublic")}
-              className="mb-3"
-            />
-            <Form.Text className="text-muted small">
-              Public replies will be visible to customers and other potential
-              customers.
-            </Form.Text>
-          </Form.Group>
-        </Form>
-      </Modal.Body>
-
-      <Modal.Footer className="border-0 pt-0 px-4 pb-4">
-        <div className="d-flex gap-3 w-100 justify-content-end">
+        ) : undefined
+      }
+      footerRight={
+        <>
           <Button
             variant="outline-secondary"
             onClick={handleClose}
@@ -255,8 +184,72 @@ export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
               </>
             )}
           </Button>
+        </>
+      }
+    >
+      <div className="mb-3">
+        <h6 className="text-muted mb-3 fw-medium">
+          Original Review by {customerName}:
+        </h6>
+        <div className="p-4 rounded-3 review-reply-original">
+          <p className="mb-0 text-dark">{reviewText}</p>
         </div>
-      </Modal.Footer>
-    </Modal>
+      </div>
+
+      <AISuggestionDisplay
+        suggestion={aiSuggestion}
+        showSuggestion={showSuggestion}
+        hasSuggestion={hasSuggestion}
+        isLoading={isSuggestionLoading}
+        onGetSuggestion={handleGetSuggestion}
+        onUseSuggestion={handleUseSuggestion}
+        disabled={isTyping || !reviewText.trim()}
+        className="mb-4"
+      />
+
+      <Form onSubmit={handleSubmit(handleFormSubmit)}>
+        <Form.Group className="mb-4">
+          <Form.Label className="fw-medium mb-3">Reply Text</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={4}
+            placeholder="Write a professional and helpful reply..."
+            {...register("text")}
+            onChange={handleTextChange}
+            isInvalid={!!errors.text}
+            className="bulk-reply-textarea"
+          />
+          <Form.Control.Feedback type="invalid" className="mt-2">
+            {errors.text?.message}
+          </Form.Control.Feedback>
+          <div className="d-flex justify-content-between mt-3">
+            <Form.Text
+              className={isOverLimit ? "text-danger" : "text-muted small"}
+            >
+              {characterCount} / {REPLY_LIMITS.MAX_LENGTH} characters
+              {isOverLimit && " (over limit)"}
+            </Form.Text>
+            {remainingChars < 50 && remainingChars > 0 && (
+              <Form.Text className="text-warning small">
+                {remainingChars} characters remaining
+              </Form.Text>
+            )}
+          </div>
+        </Form.Group>
+
+        <Form.Group className="mb-4">
+          <Form.Check
+            type="checkbox"
+            label="Make this reply public (visible to customers)"
+            {...register("isPublic")}
+            className="mb-3"
+          />
+          <Form.Text className="text-muted small">
+            Public replies will be visible to customers and other potential
+            customers.
+          </Form.Text>
+        </Form.Group>
+      </Form>
+    </ReplyModalLayout>
   );
 };

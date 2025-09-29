@@ -1,11 +1,12 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { ResponsiveLayout } from "@/components/layout/ResponsiveLayout";
-import { SingleReviewReplyModal } from "./SingleReviewReplyModal";
-import { BulkReplyModal } from "./BulkReplyModal";
+import { SingleReviewReplyModal } from "./ui/SingleReviewReplyModal";
+import { BulkReplyModal } from "./ui/BulkReplyModal";
 import { ReviewsHeader, ReviewsFilters } from "@/components/common";
-import { ReviewsContent } from "./ReviewsContent";
+import { ReviewsContent } from "./ui/ReviewsContent";
 import { useReviews, useReviewsFilters } from "@/hooks";
 import type { Review } from "@/services/types";
+import { useModalContext } from "@/stores/ModalContext";
 
 export const ReviewsPage: React.FC = () => {
   const [selectedReview, setSelectedReview] = useState<{
@@ -14,8 +15,14 @@ export const ReviewsPage: React.FC = () => {
     customerName: string;
   } | null>(null);
 
-  const [showReplyModal, setShowReplyModal] = useState(false);
-  const [showBulkReplyModal, setShowBulkReplyModal] = useState(false);
+  const {
+    isReplyOpen,
+    isBulkOpen,
+    openReply,
+    closeReply,
+    openBulk,
+    closeBulk,
+  } = useModalContext();
   const [searchTerm, setSearchTerm] = useState("");
 
   const {
@@ -39,21 +46,21 @@ export const ReviewsPage: React.FC = () => {
       text: review.comment,
       customerName: review.customerName,
     });
-    setShowReplyModal(true);
+    openReply();
   }, []);
 
   const handleCloseReplyModal = useCallback(() => {
-    setShowReplyModal(false);
+    closeReply();
     setSelectedReview(null);
-  }, []);
-
-  const handleCloseBulkReplyModal = useCallback(() => {
-    setShowBulkReplyModal(false);
-  }, []);
+  }, [closeReply]);
 
   const handleBulkReply = useCallback(() => {
-    setShowBulkReplyModal(true);
-  }, []);
+    openBulk();
+  }, [openBulk]);
+
+  const handleCloseBulkReplyModal = useCallback(() => {
+    closeBulk();
+  }, [closeBulk]);
 
   const handleRefreshReviews = useCallback(() => {
     mutate({ data: filters });
@@ -76,7 +83,6 @@ export const ReviewsPage: React.FC = () => {
 
   const reviews = data?.reviews || [];
 
-  // Filter reviews based on search term
   const filteredReviews = searchTerm.trim()
     ? reviews.filter((review) => {
         const searchLower = searchTerm.toLowerCase();
@@ -164,7 +170,7 @@ export const ReviewsPage: React.FC = () => {
 
       {/* Modals */}
       <SingleReviewReplyModal
-        show={showReplyModal && selectedReview !== null}
+        show={isReplyOpen && selectedReview !== null}
         reviewId={selectedReview?.id || ""}
         reviewText={selectedReview?.text || ""}
         customerName={selectedReview?.customerName || ""}
@@ -173,7 +179,7 @@ export const ReviewsPage: React.FC = () => {
       />
 
       <BulkReplyModal
-        show={showBulkReplyModal}
+        show={isBulkOpen}
         reviews={reviews}
         onClose={handleCloseBulkReplyModal}
         onSuccess={handleBulkReplySuccess}

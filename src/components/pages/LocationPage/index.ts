@@ -1,4 +1,4 @@
 // Location Page - All location-related functionality
-export { LocationReviews } from "./LocationReviews";
-export { LocationHygiene } from "./LocationHygiene";
-export { LocationLabels } from "./LocationLabels";
+export { LocationReviews } from "./ui/LocationReviews";
+export { LocationHygiene } from "./ui/LocationHygiene";
+export { LocationLabels } from "./ui/LocationLabels";

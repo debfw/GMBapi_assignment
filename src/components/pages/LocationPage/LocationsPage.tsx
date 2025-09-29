@@ -68,8 +68,6 @@ export const LocationsPage: React.FC = () => {
   const totalPages = Math.ceil((metadata?.results || 0) / perPage);
   const startItem = (currentPage - 1) * perPage + 1;
   const endItem = Math.min(currentPage * perPage, metadata?.results || 0);
-
-  // Pagination display calculations
   const maxVisible = isMobile ? 3 : 5;
   let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
   let end = Math.min(totalPages, start + maxVisible - 1);
@@ -83,99 +81,6 @@ export const LocationsPage: React.FC = () => {
       setCurrentPage(page);
       window.scrollTo(0, 0);
     }
-  };
-
-  const renderPagination = () => {
-    if (totalPages <= 1) return null;
-
-    const pages = [];
-    const maxVisible = isMobile ? 3 : 5;
-    let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-    let end = Math.min(totalPages, start + maxVisible - 1);
-
-    if (end - start + 1 < maxVisible) {
-      start = Math.max(1, end - maxVisible + 1);
-    }
-
-    return (
-      <nav aria-label="Locations pagination" className="mt-4">
-        <ul className="pagination justify-content-center">
-          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-            <button
-              className="page-link"
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-            >
-              <ChevronLeft size={16} />
-            </button>
-          </li>
-
-          {start > 1 && (
-            <>
-              <li className="page-item">
-                <button
-                  className="page-link"
-                  onClick={() => handlePageChange(1)}
-                >
-                  1
-                </button>
-              </li>
-              {start > 2 && (
-                <li className="page-item disabled">
-                  <span className="page-link">...</span>
-                </li>
-              )}
-            </>
-          )}
-
-          {Array.from({ length: end - start + 1 }, (_, i) => start + i).map(
-            (page) => (
-              <li
-                key={page}
-                className={`page-item ${currentPage === page ? "active" : ""}`}
-              >
-                <button
-                  className="page-link"
-                  onClick={() => handlePageChange(page)}
-                >
-                  {page}
-                </button>
-              </li>
-            )
-          )}
-
-          {end < totalPages && (
-            <>
-              {end < totalPages - 1 && (
-                <li className="page-item disabled">
-                  <span className="page-link">...</span>
-                </li>
-              )}
-              <li className="page-item">
-                <button
-                  className="page-link"
-                  onClick={() => handlePageChange(totalPages)}
-                >
-                  {totalPages}
-                </button>
-              </li>
-            </>
-          )}
-
-          <li
-            className={`page-item ${currentPage === totalPages ? "disabled" : ""}`}
-          >
-            <button
-              className="page-link"
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </li>
-        </ul>
-      </nav>
-    );
   };
 
   return (

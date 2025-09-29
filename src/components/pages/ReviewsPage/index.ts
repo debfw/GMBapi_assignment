@@ -1,16 +1,15 @@
 // Reviews Page - All review-related functionality
 export { ReviewsPage } from "./ReviewsPage";
-export { ReviewsContent } from "./ReviewsContent";
-export { ApiStatusAlert } from "./ApiStatusAlert";
+export { ReviewsContent } from "./ui/ReviewsContent";
+export { ApiStatusAlert } from "../../common/ApiStatusAlert";
 
 // Review display components
-export { ReviewCard } from "./ReviewCard";
-export { ReviewContent } from "./ReviewContent";
-export { ReviewHeader } from "./ReviewHeader";
-export { ReviewReplyDisplay } from "./ReviewReplyDisplay";
+export { ReviewCard } from "./ui/ReviewCard";
+export { ReviewContent } from "./ui/ReviewContent";
+export { ReviewHeader } from "./ui/ReviewHeader";
+export { ReviewReplyDisplay } from "./ui/ReviewReplyDisplay";
 
 // Modal components
-export { BulkReplyModal } from "./BulkReplyModal";
-export { SingleReviewReplyModal } from "./SingleReviewReplyModal";
-export { ReplyForm } from "./ReplyForm";
-export { ReviewSelection } from "./ReviewSelection";
+export { SingleReviewReplyModal } from "./ui/SingleReviewReplyModal";
+export { ReplyForm } from "../../common/ReplyForm";
+export { ReviewSelection } from "./ui/ReviewSelection";

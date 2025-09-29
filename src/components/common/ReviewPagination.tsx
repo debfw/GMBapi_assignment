@@ -1,5 +1,5 @@
 import React from "react";
-import { Pagination } from "react-bootstrap";
+import { Pagination as BsPagination } from "react-bootstrap";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Pagination as PaginationType } from "@/services/types";
 
@@ -16,7 +16,6 @@ export const ReviewPagination: React.FC<ReviewPaginationProps> = ({
 }) => {
   const { page, totalPages } = pagination;
 
-  // Calculate hasNext and hasPrev based on current page and total pages
   const hasNext = page < totalPages;
   const hasPrev = page > 1;
 
@@ -25,7 +24,7 @@ export const ReviewPagination: React.FC<ReviewPaginationProps> = ({
   }
 
   const renderPageItems = () => {
-    const items = [];
+    const items = [] as React.ReactNode[];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, page - Math.floor(maxVisiblePages / 2));
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -34,71 +33,66 @@ export const ReviewPagination: React.FC<ReviewPaginationProps> = ({
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
-    // Previous button
     items.push(
-      <Pagination.Prev
+      <BsPagination.Prev
         key="prev"
         disabled={!hasPrev}
         onClick={() => hasPrev && onPageChange(page - 1)}
       >
         <ChevronLeft size={16} />
-      </Pagination.Prev>
+      </BsPagination.Prev>
     );
 
-    // First page
     if (startPage > 1) {
       items.push(
-        <Pagination.Item
+        <BsPagination.Item
           key={1}
           active={page === 1}
           onClick={() => onPageChange(1)}
         >
           1
-        </Pagination.Item>
+        </BsPagination.Item>
       );
       if (startPage > 2) {
-        items.push(<Pagination.Ellipsis key="ellipsis-start" />);
+        items.push(<BsPagination.Ellipsis key="ellipsis-start" />);
       }
     }
 
-    // Page numbers
     for (let i = startPage; i <= endPage; i++) {
       items.push(
-        <Pagination.Item
+        <BsPagination.Item
           key={i}
           active={page === i}
           onClick={() => onPageChange(i)}
         >
           {i}
-        </Pagination.Item>
+        </BsPagination.Item>
       );
     }
 
-    // Last page
     if (endPage < totalPages) {
       if (endPage < totalPages - 1) {
-        items.push(<Pagination.Ellipsis key="ellipsis-end" />);
+        items.push(<BsPagination.Ellipsis key="ellipsis-end" />);
       }
       items.push(
-        <Pagination.Item
+        <BsPagination.Item
           key={totalPages}
           active={page === totalPages}
           onClick={() => onPageChange(totalPages)}
         >
           {totalPages}
-        </Pagination.Item>
+        </BsPagination.Item>
       );
     }
 
-    // Next button
     items.push(
-      <Pagination.Next
+      <BsPagination.Next
         key="next"
         disabled={!hasNext}
         onClick={() => hasNext && onPageChange(page + 1)}
       >
         <ChevronRight size={16} />
-      </Pagination.Next>
+      </BsPagination.Next>
     );
 
     return items;
@@ -109,9 +103,9 @@ export const ReviewPagination: React.FC<ReviewPaginationProps> = ({
       className={`d-flex justify-content-center ${className}`}
       data-testid="pagination"
     >
-      <Pagination className="mb-0 pagination-custom">
+      <BsPagination className="mb-0 pagination-custom">
         {renderPageItems()}
-      </Pagination>
+      </BsPagination>
     </div>
   );
 };

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Star, MessageSquare, Clock, ThumbsUp } from "lucide-react";
-import { MetricCard } from "@/components/ui";
 import { COLORS } from "@/styles/design-system";
 import { useAccountKPIs } from "@/hooks/useAccountKPIs";
 import { LoadingSpinner } from "@/components/common/LoadingSpinner";
+import { MetricCard } from "@/components/common/MetricCard";
 
 interface ReviewsHeaderProps {
   className?: string;
