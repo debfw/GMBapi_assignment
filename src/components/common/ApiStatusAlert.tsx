@@ -1,10 +1,10 @@
-import React from "react";
+import React, { memo } from "react";
 
 interface ApiStatusAlertProps {
   isApiDisabled: boolean;
 }
 
-export const ApiStatusAlert: React.FC<ApiStatusAlertProps> = React.memo(
+export const ApiStatusAlert: React.FC<ApiStatusAlertProps> = memo(
   ({ isApiDisabled }) => {
     if (!isApiDisabled) {
       return null;

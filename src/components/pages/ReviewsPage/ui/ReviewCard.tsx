@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Card, Row, Col } from "react-bootstrap";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewContent } from "./ReviewContent";
@@ -11,7 +11,7 @@ interface ReviewCardProps {
   className?: string;
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = React.memo(
+export const ReviewCard: React.FC<ReviewCardProps> = memo(
   ({ review, onReply, className = "" }) => {
     return (
       <Card className={`mb-3 ${className}`}>

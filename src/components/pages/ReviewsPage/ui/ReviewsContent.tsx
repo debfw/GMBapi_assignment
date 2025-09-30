@@ -1,5 +1,4 @@
-import React from "react";
-// import { COLORS } from "@/styles/design-system";
+import React, { memo } from "react";
 import type { ReviewDomain, PaginationDomain } from "@/services/domain/types";
 import type { FilterState } from "@/components/pages/ReviewsPage/hooks/useReviewsFilters";
 import { ReviewList } from "./ReviewList";
@@ -15,7 +14,7 @@ interface ReviewsContentProps {
   isSearching?: boolean;
 }
 
-export const ReviewsContent: React.FC<ReviewsContentProps> = React.memo(
+export const ReviewsContent: React.FC<ReviewsContentProps> = memo(
   ({
     reviews,
     pagination,

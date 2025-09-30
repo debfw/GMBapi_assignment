@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Container, Alert, Row, Col } from "react-bootstrap";
 import { ReviewCard } from "./ReviewCard";
 import { ReviewPagination } from "@/components/common";
@@ -19,7 +19,7 @@ interface ReviewListProps {
   hidePagination?: boolean;
 }
 
-export const ReviewList: React.FC<ReviewListProps> = React.memo(
+export const ReviewList: React.FC<ReviewListProps> = memo(
   ({
     reviews,
     pagination,

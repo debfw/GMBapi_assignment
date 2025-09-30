@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, memo } from "react";
 import { Card, Badge, Button } from "react-bootstrap";
 import { CheckCircle } from "lucide-react";
 import { formatRelativeTime } from "@/utils/formatting";
@@ -11,7 +11,7 @@ interface ReviewSelectionProps {
   onSelectReview: (reviewId: string) => void;
 }
 
-export const ReviewSelection: React.FC<ReviewSelectionProps> = React.memo(
+export const ReviewSelection: React.FC<ReviewSelectionProps> = memo(
   ({ reviews, selectedReviews, onSelectAll, onSelectReview }) => {
     // Filter reviews that can be replied to (status: "new")
     const replyableReviews = useMemo(

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import { Button } from "react-bootstrap";
 import { Send, X, Users } from "lucide-react";
 import { ReviewSelection } from "./ReviewSelection";
@@ -18,7 +18,7 @@ type BulkReplyFormData = {
   isPublic: boolean;
 };
 
-export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
+export const BulkReplyModal: React.FC<BulkReplyModalProps> = memo(
   ({ show, reviews, onClose }) => {
     const [selectedReviews, setSelectedReviews] = useState<Set<string>>(
       new Set()

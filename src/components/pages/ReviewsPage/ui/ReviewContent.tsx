@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, memo } from "react";
 import { Button } from "react-bootstrap";
 import { formatDate } from "@/utils/formatting";
 import { truncateText } from "@/utils/formatting";
@@ -8,7 +8,7 @@ interface ReviewContentProps {
   review: ReviewDomain;
 }
 
-export const ReviewContent: React.FC<ReviewContentProps> = React.memo(
+export const ReviewContent: React.FC<ReviewContentProps> = memo(
   ({ review }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const maxLength = 200;

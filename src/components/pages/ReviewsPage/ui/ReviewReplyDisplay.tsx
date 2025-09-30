@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { Button } from "react-bootstrap";
 import { MessageCircle } from "lucide-react";
 import { formatRelativeTime } from "@/utils/formatting";
@@ -9,7 +9,7 @@ interface ReviewReplyProps {
   onReply: (review: ReviewDomain) => void;
 }
 
-export const ReviewReplyDisplay: React.FC<ReviewReplyProps> = React.memo(
+export const ReviewReplyDisplay: React.FC<ReviewReplyProps> = memo(
   ({ review, onReply }) => {
     return (
       <>
@@ -18,13 +18,7 @@ export const ReviewReplyDisplay: React.FC<ReviewReplyProps> = React.memo(
             <div className="mb-2">
               <div className="review-card-column-title">
                 Reply{" "}
-                <span
-                  className="text-muted"
-                  style={{
-                    fontSize: "0.6rem",
-                    textTransform: "capitalize",
-                  }}
-                >
+                <span className="text-muted text-capitalize">
                   ({formatRelativeTime(review.businessReply.date)})
                 </span>
               </div>
