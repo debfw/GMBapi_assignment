@@ -18,7 +18,9 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:record": "playwright test --video=on",
     "test:ui": "vitest --ui",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test:mjs": "npm run test:mjs:all",
+    "test:mjs:all": "node tests/mjs/test-interactive.mjs && node tests/mjs/test-comprehensive.mjs && node tests/mjs/test-pagination-fixed.mjs && node tests/mjs/test-filters.mjs && node tests/mjs/test-date-picker.mjs && node tests/mjs/test-date-filter-fixed.mjs"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
