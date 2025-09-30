@@ -63,7 +63,6 @@ export const SingleReviewReplyModal: React.FC<ReviewReplyProps> = ({
           </Alert>
         ) : undefined
       }
-      aiSuggestionConfig={{}}
       footerRight={
         <>
           <Button

@@ -70,9 +70,6 @@ export const BulkReplyModal: React.FC<BulkReplyModalProps> = React.memo(
             </div>
           ) : undefined
         }
-        aiSuggestionConfig={{
-          onSuggestionApplied: () => {},
-        }}
         footerRight={
           <>
             <Button

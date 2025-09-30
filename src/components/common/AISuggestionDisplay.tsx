@@ -1,37 +1,55 @@
 import React from "react";
 import { Button } from "react-bootstrap";
 import { Lightbulb } from "lucide-react";
+import { useAISuggestion } from "@/hooks";
+import type { UseFormSetValue } from "react-hook-form";
 
 interface AISuggestionDisplayProps {
-  suggestion: string;
-  showSuggestion: boolean;
-  hasSuggestion: boolean;
-  isLoading: boolean;
-  onGetSuggestion: () => void;
-  onUseSuggestion: () => void;
   disabled?: boolean;
   buttonText?: string;
   className?: string;
+  prompt?: string;
+  onUseSuggestion: UseFormSetValue<{
+    text: string;
+    isPublic: boolean;
+  }>;
+  aiSuggestionConfig?: {
+    onSuggestionApplied?: (suggestion: string) => void;
+  };
 }
 
 export const AISuggestionDisplay: React.FC<AISuggestionDisplayProps> = ({
-  suggestion,
-  showSuggestion,
-  hasSuggestion,
-  isLoading,
-  onGetSuggestion,
-  onUseSuggestion,
   disabled = false,
   buttonText,
   className = "",
+  prompt,
+  onUseSuggestion,
 }) => {
+  const {
+    aiSuggestion: suggestion,
+    showSuggestion,
+    hasSuggestion,
+    isLoading,
+    handleGetSuggestion: onGetSuggestion,
+    handleUseSuggestion,
+  } = useAISuggestion();
+
   return (
     <>
       {/* AI Suggestion Button */}
       <Button
         variant="outline-primary"
         size="sm"
-        onClick={hasSuggestion ? onUseSuggestion : onGetSuggestion}
+        onClick={() => {
+          hasSuggestion
+            ? (() => {
+                onUseSuggestion("text", suggestion);
+                handleUseSuggestion();
+              })()
+            : (() => {
+                onGetSuggestion(prompt || "");
+              })();
+        }}
         disabled={disabled || isLoading}
         className={`d-flex align-items-center ${className}`}
       >

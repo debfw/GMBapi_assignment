@@ -1,6 +1,5 @@
-import React, { createContext, useContext } from "react";
+import React from "react";
 import { Modal } from "react-bootstrap";
-import { useAISuggestion } from "@/hooks/useAISuggestion";
 
 interface ReplyModalLayoutProps {
   show: boolean;
@@ -14,29 +13,6 @@ interface ReplyModalLayoutProps {
   footerClassName?: string;
   warningNode?: React.ReactNode;
   footerRight?: React.ReactNode;
-  aiSuggestionConfig?: {
-    onSuggestionApplied?: (suggestion: string) => void;
-  };
-}
-
-type SuggestionContextValue = {
-  aiSuggestion: string;
-  showSuggestion: boolean;
-  hasSuggestion: boolean;
-  isLoading: boolean;
-  handleGetSuggestion: (text: string) => void;
-  handleUseSuggestion: () => void;
-  clearSuggestion: () => void;
-};
-
-const SuggestionContext = createContext<SuggestionContextValue | undefined>(
-  undefined
-);
-
-export function useReplyModalAISuggestion():
-  | SuggestionContextValue
-  | undefined {
-  return useContext(SuggestionContext);
 }
 
 export const ReplyModalLayout: React.FC<
@@ -53,13 +29,8 @@ export const ReplyModalLayout: React.FC<
   footerClassName,
   warningNode,
   footerRight,
-  aiSuggestionConfig,
   children,
 }) => {
-  const ai = useAISuggestion({
-    onSuggestionUsed: aiSuggestionConfig?.onSuggestionApplied,
-  });
-
   return (
     <Modal
       show={show}
@@ -76,19 +47,8 @@ export const ReplyModalLayout: React.FC<
       </Modal.Header>
       <Modal.Body className={bodyClassName ?? "px-4 pb-4"}>
         {warningNode}
-        <SuggestionContext.Provider
-          value={{
-            aiSuggestion: ai.aiSuggestion,
-            showSuggestion: ai.showSuggestion,
-            hasSuggestion: ai.hasSuggestion,
-            isLoading: ai.isLoading,
-            handleGetSuggestion: ai.handleGetSuggestion,
-            handleUseSuggestion: ai.handleUseSuggestion,
-            clearSuggestion: ai.clearSuggestion,
-          }}
-        >
-          {children}
-        </SuggestionContext.Provider>
+
+        {children}
       </Modal.Body>
       {footerRight && (
         <Modal.Footer className={footerClassName ?? "border-0 pt-0 px-4 pb-4"}>
